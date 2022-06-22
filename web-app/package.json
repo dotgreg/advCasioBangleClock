@@ -1,0 +1,23 @@
+{
+		"name": "bangle-clock-app",
+		"version": "1.0.0",
+		"description": "",
+		"main": "server.js",
+		"scripts": {
+				"dev": "nodemon server/server.js",
+				"start": "node server/server.js",
+				"open": "https://shielded-shelf-77386.herokuapp.com/?action=mini&nb=5",
+				"log": "heroku logs --tail"
+		},
+		"engines": {
+				"node": "16.x"
+		},
+		"author": "",
+		"license": "ISC",
+		"dependencies": {
+				"express": "^4.18.1"
+		},
+		"devDependencies": {
+				"nodemon": "^2.0.16"
+		}
+}

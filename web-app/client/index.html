@@ -1,0 +1,39 @@
+<html lang="en-US">
+	<head>
+		<title>Advanced Casio Web App</title>
+	</head>
+	<body>
+		Advanced Casio Web App
+
+		<br/>
+		<textarea
+			onkeyup="onTextAreaChange()"
+			id="tasks"
+			rows="7" cols="9" maxlength="75"></textarea>
+
+
+		<br/>
+		<br/>
+		<button id="btnConnect">Sync</button>
+		<div id="logs"></div>
+
+		
+		<script src="https://www.puck-js.com/puck.js"></script>
+		<script src="./client.js"></script>
+		<style>
+			textarea {
+				  word-wrap: initial;
+					word-break: break-all;
+			}
+			#logs {
+					background: black;
+					max-width: 480px;
+					color: green;
+					max-height: 120px;
+					overflow-y: scroll;
+					margin: 10px;
+					padding: 10px;
+			}
+		</style>
+	</body>
+</html>
