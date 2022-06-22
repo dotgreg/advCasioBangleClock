@@ -1,0 +1,16 @@
+{
+		"name": "bangle-clock-app",
+		"version": "1.0.0",
+		"description": "",
+		"main": "index.js",
+		"scripts": {
+				"deploy": "git add .; git commit -m 'up'; git push origin master; git subtree push --prefix web-app heroku master",
+				"logs": "heroku logs --tail"
+		},
+		"repository": {
+				"type": "git",
+				"url": "git+https://bitbucket.org/dotgreg/advcasiobangle.git"
+		},
+		"author": "",
+		"license": "ISC"
+}
