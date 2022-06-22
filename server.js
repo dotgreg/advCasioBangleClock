@@ -8,6 +8,7 @@ const port = process.env.PORT || 5005;
 // app.get('/', function(req, res) {
 // 		res.sendFile(path.join(__dirname, './client/index.html'));
 // });
+getLocationCoords("Paris, France")
 app.use('/', express.static('./client'))
 app.get('/api', (req, res) => {
     const q = {
@@ -23,9 +24,7 @@ app.listen(port, () => {
     console.log("Example app listening at http://localhost", port)
 })
 
-setTimeout(() => {
-		getLocationCoords("Paris, France", coords => {console.log(coords);})
-})
+
 
 
 
@@ -79,8 +78,7 @@ const fetchData = (url, onData) => {
 
 const getLocationCoords = (location, onData) => {
 		fetchData(`http://api.openweathermap.org/data/2.5/weather?q=${location}&appid=c9faf631b1c838fa4d4c0012498e2730&units=metric`, data => {
-				onData(data.coord)
-				// console.log(2, data)
+				console.log(2, data)
 		})
 }
 
