@@ -6,7 +6,8 @@
 		"scripts": {
 				"dev": "nodemon server/server.js",
 				"start": "node server/server.js",
-				"open": "https://shielded-shelf-77386.herokuapp.com/?action=mini&nb=5",
+				"open": "https://adv-casio-bangle-updater.herokuapp.com",
+				"deploy": "git push heroku master",
 				"log": "heroku logs --tail"
 		},
 		"engines": {
