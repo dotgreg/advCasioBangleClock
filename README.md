@@ -4,7 +4,7 @@
 
 An over-engineered clock inspired by Casio watches.<br/>
 It has a dedicated timer, a scratchpad and can display the weather condition 4 days ahead.<br/>
-It uses a custom webapp to update its content.<br/>
+It uses a <a href="https://adv-casio-bangle-updater.herokuapp.com/">custom web app</a> to update its content.<br/>
 Forked from the awesome Cassio Watch.<br/>
 
 ## Todo
