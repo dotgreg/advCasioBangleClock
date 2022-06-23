@@ -64,7 +64,7 @@ document.getElementById("btnConnect").addEventListener("click", mainLogic);
 //
 const getWeather = (location, apikey, cb) => {
 		// get coords
-		log(`Getting weather for ${location} using api key ${apiKey}`);
+		log(`Getting weather for ${location} using api key ${apikey}`);
 		fetch(`https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apikey}&units=metric`)
 				.then(response => response.json())
 				.then(data => {
