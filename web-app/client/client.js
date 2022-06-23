@@ -5,7 +5,7 @@ const apiKeyInput = document.getElementById("apikey")
 const logsDiv = document.getElementById("logs")
 const log = (str) => {
 		const time = new Date().getHours() + "h" + new Date().getMinutes() + ":" + new Date().getSeconds()
-		str = time + "=>" + str
+		str = time + " => " + str
 		logsDiv.innerHTML = " - " + str + "<br/>" + logsDiv.innerHTML
 		console.log("[LOG] =>", str);
 }
