@@ -4,6 +4,8 @@ const locationInput = document.getElementById("location")
 const apiKeyInput = document.getElementById("apikey")
 const logsDiv = document.getElementById("logs")
 const log = (str) => {
+		const time = new Date().getHours() + "h" + new Date().getMinutes() + ":" + new Date().getSeconds()
+		str = time + "=>" + str
 		logsDiv.innerHTML = " - " + str + "<br/>" + logsDiv.innerHTML
 		console.log("[LOG] =>", str);
 }
@@ -17,8 +19,7 @@ const syncToBangle = (fileName, jsonObj) => {
 				jsonObj.tasks = jsonObj.tasks.match(/.{1,11}/g).join("\n")
 		}
 		const content = JSON.stringify(jsonObj)
-		log(`waiting for it `);
-		// connection.write("reset();\n", function() {
+		log(`starting syncing process`);
 		setTimeout(function() {
 				log(`writing "${content}" to ${fileName}`);
 				Puck.eval(`require("Storage").writeJSON("${fileName}", ${content})`,function(x) {
@@ -28,49 +29,6 @@ const syncToBangle = (fileName, jsonObj) => {
 		})
 }
 
-var connection;
-const syncToBangleold = (fileName, jsonObj) => {
-		// disconnect if connected already
-		if (connection) {
-				connection.close();
-				connection = undefined;
-		}
-		// Connect
-		Puck.connect(function(c) {
-				if (!c) {
-						// alert("Couldn't connect!");
-						log("couldnot connect");
-						return;
-				}
-				connection = c;
-				// Handle the data we get back, and call 'onLine'
-				// whenever we get a line
-				var buf = "";
-				connection.on("data", function(d) {
-						buf += d;
-						var l = buf.split("\n");
-						buf = l.pop();
-						l.forEach(line => {
-								log(line)
-						});
-				});
-				if (jsonObj.tasks) {
-						// chunk it in arr of 11 chars 
-						jsonObj.tasks = jsonObj.tasks.match(/.{1,11}/g).join("\n")
-				}
-				const content = JSON.stringify(jsonObj)
-				log(`waiting for it `);
-				// connection.write("reset();\n", function() {
-				setTimeout(function() {
-						log(`writing "${content}" to ${fileName}`);
-						Puck.eval(`require("Storage").writeJSON("${fileName}", ${content})`,function(x) {
-								log(1, x);
-
-
-						})
-				}, 100)
-		});
-}
 
 const getFromLs = () => {
 		textarea.value = localStorage.getItem('tasks');
