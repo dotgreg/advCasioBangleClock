@@ -1,0 +1,53 @@
+<html lang="en-US">
+	<head>
+		<title>Advanced Casio Web App</title>
+		<meta charset="utf-8" name="viewport" 
+					content= "width=device-width, initial-scale=1.0">
+	</head>
+	<body>
+		<h2>Advanced Casio Web App</h2>
+		<h3> Scratchpad content </h3>
+		<textarea
+			onkeyup="onInputChange()"
+			id="tasks"
+			rows="7" cols="9" maxlength="75"></textarea>
+
+
+		<br/>
+		<br/>
+		<button id="btnConnect">Sync to your Bangle</button>
+		<div id="logs"></div>
+
+		<h3>Weather</h3>
+		location :
+		<input onkeyup="onInputChange()" type="text" placeholder="paris, france" id="location"/>
+		<br/>
+
+		openweathermap api key:
+		<input onkeyup="onInputChange()" type="text" placeholder="" id="apikey"/>
+
+		
+		<script src="https://www.puck-js.com/puck.js"></script>
+		<script src="./client.js"></script>
+		<style>
+			body, html {
+					font-family: sans-serif, arial;
+			}
+			h1,h2,h3 {
+			}
+			textarea {
+				  word-wrap: initial;
+					word-break: break-all;
+			}
+			#logs {
+					background: black;
+					max-width: 480px;
+					color: green;
+					max-height: 120px;
+					overflow-y: scroll;
+					margin: 10px;
+					padding: 10px;
+			}
+		</style>
+	</body>
+</html>
