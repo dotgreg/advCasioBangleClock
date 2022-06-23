@@ -66,9 +66,12 @@ document.getElementById("btnConnect").addEventListener("click", mainLogic);
 //
 const getWeather = (location, apikey, cb) => {
 		// get coords
+		log(`Getting weather for ${location} using api key ${apiKey}`);
 		fetch(`https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apikey}&units=metric`)
 				.then(response => response.json())
 				.then(data => {
+						if (!data.coord) 		log(`ERROR weather api: ${JSON.stringify(data)}`);
+						
 						const lat = data.coord.lat
 						const lon = data.coord.lon
 						log(`got weather coords from ${location} : ${lat} ${lon}`)
@@ -76,6 +79,7 @@ const getWeather = (location, apikey, cb) => {
 						fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=c9faf631b1c838fa4d4c0012498e2730&units=metric`)
 								.then(response => response.json())
 								.then(data => {
+										if (!data.daily) 		log(`ERROR weather api: ${JSON.stringify(data)}`);
 										let res = []
 										for(let i = 0; i < data.daily.length; i++) {
 												const d = data.daily[i]
