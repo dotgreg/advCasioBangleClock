@@ -1,13 +1,15 @@
 <html lang="en-US">
 	<head>
 		<title>Advanced Casio Web App</title>
+		<meta charset="utf-8" name="viewport" 
+					content= "width=device-width, initial-scale=1.0">
 	</head>
 	<body>
 		Advanced Casio Web App
 
 		<br/>
 		<textarea
-			onkeyup="onTextAreaChange()"
+			onkeyup="onInputChange()"
 			id="tasks"
 			rows="7" cols="9" maxlength="75"></textarea>
 
@@ -16,6 +18,14 @@
 		<br/>
 		<button id="btnConnect">Sync</button>
 		<div id="logs"></div>
+
+		<h3>Weather</h3>
+		location :
+		<input onkeyup="onInputChange()" type="text" placeholder="paris, france" id="location"/>
+		<br/>
+
+		openweathermap api key:
+		<input onkeyup="onInputChange()" type="text" placeholder="" id="apikey"/>
 
 		
 		<script src="https://www.puck-js.com/puck.js"></script>

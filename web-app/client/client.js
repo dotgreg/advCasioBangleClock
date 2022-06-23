@@ -1,14 +1,20 @@
 console.log("woop");
 const textarea = document.getElementById("tasks")
+const locationInput = document.getElementById("location")
+const apiKeyInput = document.getElementById("apikey")
 const logsDiv = document.getElementById("logs")
-const log = (str) => {logsDiv.innerHTML = " - " + str + "<br/>" + logsDiv.innerHTML}
+const log = (str) => {
+		logsDiv.innerHTML = " - " + str + "<br/>" + logsDiv.innerHTML
+		console.log("[LOG] =>", str);
+}
 
+/////////////////////////////////////////////
+// SYNC TO BANGLE
+//
 const syncToBangle = (fileName, jsonObj) => {
 		if (jsonObj.tasks) {
 				// chunk it in arr of 11 chars 
-				console.log(1, jsonObj.tasks);
 				jsonObj.tasks = jsonObj.tasks.match(/.{1,11}/g).join("\n")
-				console.log(2, jsonObj.tasks);
 		}
 		const content = JSON.stringify(jsonObj)
 		log(`waiting for it `);
@@ -16,9 +22,8 @@ const syncToBangle = (fileName, jsonObj) => {
 		setTimeout(function() {
 				log(`writing "${content}" to ${fileName}`);
 				Puck.eval(`require("Storage").writeJSON("${fileName}", ${content})`,function(x) {
-						log(1, x);
-
-
+						if (x === true) log("BANGLE => Writing success!")
+						else log(x);
 				})
 		})
 }
@@ -46,24 +51,12 @@ const syncToBangleold = (fileName, jsonObj) => {
 						var l = buf.split("\n");
 						buf = l.pop();
 						l.forEach(line => {
-								console.log(3, line);
 								log(line)
 						});
 				});
-				// First, reset the Bangle
-				// connection.write("reset();\n", function() {
-				// 		// Wait for it to reset itself
-				// 		setTimeout(function() {
-				// 				// Now upload our code to it
-				// 				connection.write("\x03\x10if(1){"+BANGLE_CODE+"}\n",
-				// 												 function() { console.log("Ready..."); });
-				// 		}, 1500);
-				// });
 				if (jsonObj.tasks) {
 						// chunk it in arr of 11 chars 
-						console.log(1, jsonObj.tasks);
 						jsonObj.tasks = jsonObj.tasks.match(/.{1,11}/g).join("\n")
-						console.log(2, jsonObj.tasks);
 				}
 				const content = JSON.stringify(jsonObj)
 				log(`waiting for it `);
@@ -75,27 +68,21 @@ const syncToBangleold = (fileName, jsonObj) => {
 
 
 						})
-
-						// connection.write(`require("Storage").writeJSON("${fileName}", ${JSON.stringify(jsonObj)})`, function(res) {
-						// 		console.log(1, res);
-						// 		connection.write(`require("storage").readjson("testjson.json")`, function(res2) {
-						// 				console.log(2, res2);
-						// 		})
-						// })
 				}, 100)
-				// })
 		});
 }
 
 const getFromLs = () => {
 		textarea.value = localStorage.getItem('tasks');
+		locationInput.value = localStorage.getItem('location');
+		apiKeyInput.value = localStorage.getItem('apikey');
 }
 const setLs = () => {
 		localStorage.setItem('tasks', textarea.value);
+		localStorage.setItem('location', locationInput.value);
+		localStorage.setItem('apikey', apiKeyInput.value);
 }
-const onTextAreaChange = () => {
-		setLs(textarea.value)
-}
+const onInputChange = () => {setLs()}
 getFromLs()
 
 
@@ -106,9 +93,67 @@ const toUpload = {
 
 const mainLogic = () => {
 		toUpload.tasks = textarea.value
-		console.log(11, toUpload);
-		syncToBangle("advCasioData.json", toUpload)
+		getWeather(locationInput.value, apiKeyInput.value, arr => {
+				toUpload.weather = arr
+				log(`FINAL OBJ TO UPLOAD: ${JSON.stringify(toUpload)}`)
+				syncToBangle("advCasioData.json", toUpload)
+		})
 }
 document.getElementById("btnConnect").addEventListener("click", mainLogic);
 // document.getElementById("tasks").
 // lets put that thingy on my watchylets put that thingy on my watchylets put that thingy on my watchylets put that thingy on my watchylets put that thingy on my watchylets put that thingy on my watchylets put that thingy on my watchy
+
+/////////////////////////////////////////////
+// WEATHER
+//
+const getWeather = (location, apikey, cb) => {
+		// get coords
+		fetch(`http://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apikey}&units=metric`)
+				.then(response => response.json())
+				.then(data => {
+						const lat = data.coord.lat
+						const lon = data.coord.lon
+						log(`got weather coords from ${location} : ${lat} ${lon}`)
+						// get full data
+						fetch(`http://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=c9faf631b1c838fa4d4c0012498e2730&units=metric`)
+								.then(response => response.json())
+								.then(data => {
+										let res = []
+										for(let i = 0; i < data.daily.length; i++) {
+												const d = data.daily[i]
+												console.log(d);
+												const temp = Math.round(d.temp.day)
+												const weatherCode = getWeatherCode(d.weather[0].icon)
+												const day = new Date(d.dt * 1000).getDate()
+												// give the timestamp at 0am, not 13am
+												const timestamp = (d.dt*1000)  - (1000*60*60*13) 
+												const month = new Date(d.dt * 1000).getMonth() + 1
+												res.push([temp, weatherCode, timestamp])
+										}
+										log(`got weather conditions ${JSON.stringify(res)}`)
+										cb(res);
+								});
+				});
+}
+
+// sun, cloud, rain, thunder, snow
+const getWeatherCode = (nameIcon) => {
+    const equiv = {
+        '01': 'sun',
+        '02': 'cloud',
+        '03': 'cloud',
+        '04': 'cloud',
+        '09': 'rain',
+        '10': 'rain',
+        '11': 'storm',
+        '50': 'cloud',
+        '13': 'snow',
+    }
+    const nb = nameIcon.substring(0, 2);
+    const nameWeather = equiv[nb]
+
+		const codes = ["sun", "cloud", "rain", "thunder", "snow"]
+		let code = codes.indexOf(nameWeather)
+    return code;
+}
+
