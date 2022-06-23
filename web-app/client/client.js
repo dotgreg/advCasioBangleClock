@@ -108,14 +108,14 @@ document.getElementById("btnConnect").addEventListener("click", mainLogic);
 //
 const getWeather = (location, apikey, cb) => {
 		// get coords
-		fetch(`http://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apikey}&units=metric`)
+		fetch(`https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apikey}&units=metric`)
 				.then(response => response.json())
 				.then(data => {
 						const lat = data.coord.lat
 						const lon = data.coord.lon
 						log(`got weather coords from ${location} : ${lat} ${lon}`)
 						// get full data
-						fetch(`http://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=c9faf631b1c838fa4d4c0012498e2730&units=metric`)
+						fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=c9faf631b1c838fa4d4c0012498e2730&units=metric`)
 								.then(response => response.json())
 								.then(data => {
 										let res = []
