@@ -4,7 +4,7 @@
 		"description": "",
 		"main": "index.js",
 		"scripts": {
-				"deploy": "git add .; git commit -m 'up'; git push github master; git subtree push --prefix web-app heroku master; rm -r ../BangleApps/apps/advcasio; cp -r ./bangle-app-for-store ../BangleApps/apps/advcasio; cp -r ./bangle-app-for-store/README.md ./README.md",
+				"deploy": "rm -r ../BangleApps/apps/advcasio; cp -r ./bangle-app-for-store ../BangleApps/apps/advcasio; cp -r ./bangle-app-for-store/README.md ./README.md; cp -r ./web-app/client ./docs; git add .; git commit -m 'up'; git push github master; git subtree push --prefix web-app heroku master; ",
 				"logs": "heroku logs --tail"
 		},
 		"repository": {
