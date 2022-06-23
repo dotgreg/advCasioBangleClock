@@ -58,8 +58,6 @@ const mainLogic = () => {
 		})
 }
 document.getElementById("btnConnect").addEventListener("click", mainLogic);
-// document.getElementById("tasks").
-// lets put that thingy on my watchylets put that thingy on my watchylets put that thingy on my watchylets put that thingy on my watchylets put that thingy on my watchylets put that thingy on my watchylets put that thingy on my watchy
 
 /////////////////////////////////////////////
 // WEATHER
