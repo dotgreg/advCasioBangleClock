@@ -1,4 +1,3 @@
-console.log("woop");
 const textarea = document.getElementById("tasks")
 const locationInput = document.getElementById("location")
 const apiKeyInput = document.getElementById("apikey")
