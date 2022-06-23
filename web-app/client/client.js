@@ -53,8 +53,8 @@ const mainLogic = () => {
 		toUpload.tasks = textarea.value
 		getWeather(locationInput.value, apiKeyInput.value, arr => {
 				toUpload.weather = arr
-				log(`FINAL OBJ TO UPLOAD: ${JSON.stringify(toUpload)}`)
-				syncToBangle("advCasioData.json", toUpload)
+				log(`object to upload to bangle: ${JSON.stringify(toUpload)}`)
+				syncToBangle("advcasio.data.json", toUpload)
 		})
 }
 document.getElementById("btnConnect").addEventListener("click", mainLogic);
