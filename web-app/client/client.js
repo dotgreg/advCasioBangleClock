@@ -77,7 +77,7 @@ const saveTextToLs = () => {
 		const id = prompt("which name?")
 		db.push({id, text: textarea.value})
 
-		console.log(db);
+		// console.log(db);
 		localStorage.setItem("textsSaved", JSON.stringify(db))
 
 		reloadTextOptionsFromLs()
@@ -90,11 +90,20 @@ function removeOptions() {
 		}
 }
 
+const removeFirstLineJump = (arr) => {
+		// console.log(1, arr[0].text, );
+		for(i = 0; i < arr.length; i++) {
+				if (arr[0].text[0] === "\n") arr[i].text = arr[i].text.substring(1);
+		}
+		// console.log(2, arr[0].text);
+		return arr
+}
+
 const getOptions = () => {
 		return [
 				{id:"-- saved texts --", text:""},
 				...getLsTexts(),
-				...baseOptionsText
+				...removeFirstLineJump(baseOptionsText)
 		]
 }
 // reload select list 
@@ -216,7 +225,7 @@ baseOptionsText = [
 \`/.::::.\'
 \`--------'
 `},
-		{id: "ascii-joysticks",
+		{id: "ascii-joystick",
 		 text:String.raw`
    (  )
     ||
@@ -225,4 +234,67 @@ baseOptionsText = [
 /_________\
 \_________/~~~.
 `},
+		{id: "ascii-camera",
+		 text:String.raw`
+     _
+ _n_|_|_,_
+|===.-.===|
+|  ((_))  |
+'==='-'==='
+`},
+		{id: "ascii-ballon",
+		 text:String.raw`
+   oooo
+ OOOOOOOO
+ OOOOOOOO
+  oooooo
+   \  /
+    ##
+`},
+		{id: "ascii-gameboy",
+		 text:String.raw`
+ ______
+|.----.|
+||____||
+| +  o'|
+|   o  |
+|_____/
+`},
+		{id: "ascii-mouse",
+		 text:`
+  b.
+  88b
+  888b.
+  88888b
+  888888b.
+  8888P"
+  P" \`8.
+      \`8.
+`},
+		{id: "ascii-pattern-1",
+		 text:String.raw`
+\/\/\/\/\/
+/\/\/\/\/\
+\/\/\/\/\/
+/\/\/\/\/\
+\/\/\/\/\/
+/\/\/\/\/\
+\/\/\/\/\/
+/\/\/\/\/\
+`},
+		{id: "ascii-pattern-2",
+		 text:String.raw`
+ X  X  X 
+/ \/ \/ \
+\ /\ /\ /
+ X  X  X 
+/ \/ \/ \
+\ /\ /\ /
+ X  X  X 
+/ \/ \/ \
+\ /\ /\ /
+ X  X  X 
+`},
+
 ]
+
