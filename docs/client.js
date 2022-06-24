@@ -89,10 +89,18 @@ function removeOptions() {
 				selectText.remove(i);
 		}
 }
+
+const getOptions = () => {
+		return [
+				{id:"-- saved texts --", text:""},
+				...getLsTexts(),
+				...baseOptionsText
+		]
+}
 // reload select list 
 const reloadTextOptionsFromLs = () => {
 		removeOptions();
-		const optionsText = [ ...getLsTexts(), ...baseOptionsText]
+		const optionsText = getOptions()
 		for(var i = 0; i < optionsText.length; i++) {
 				var o = document.createElement("option");
 				o.value = optionsText[i].id
@@ -105,7 +113,7 @@ setTimeout(() => {
 })
 // on select list option, fill textarea value
 const onTextSelect = () => {
-		const optionsText = [ ...getLsTexts(),...baseOptionsText]
+		const optionsText = getOptions()
 		for(var i = 0; i < optionsText.length; i++) {
 				if (optionsText[i].id === selectText.value) {
 						textarea.value = optionsText[i].text;
@@ -178,7 +186,6 @@ const getWeatherCode = (nameIcon) => {
 ///////////////////////////////
 // ASCII DEFAULT 
 baseOptionsText = [
-		{id:"-- saved texts --", text:""},
 		{id: "ascii-skull",
 		 text:String.raw`
    ____
