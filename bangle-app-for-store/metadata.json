@@ -7,7 +7,9 @@
   "tags": "clock",
 	"type": "clock",
 	"screenshots": [
-			{ "url": "screenshot-clock.jpg" },
+			{ "url": "screenshot-clock-1.jpg" },
+			{ "url": "screenshot-clock-2.jpg" },
+			{ "url": "screenshot-clock-3.jpg" },
 			{ "url": "screenshot-webapp.jpg" }
   ],
   "supports" : ["BANGLEJS", "BANGLEJS2"],  
