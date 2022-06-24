@@ -25,7 +25,7 @@ Forked from the awesome Cassio Watch.<br/>
 - Scratchpad 
 
 ## Screenshots
-Clock:
+Clock:<br/>
 <img src="https://user-images.githubusercontent.com/2981891/175519126-049caf93-73d0-4472-9650-33b28f80843c.jpg" width="250" />
 <img src="https://user-images.githubusercontent.com/2981891/175519128-96926e32-2165-4c61-9364-843440304bb9.jpg" width="250" />
 <img src="https://user-images.githubusercontent.com/2981891/175519130-4921073c-48fc-4c29-932d-d42acc3b395c.jpg" width="250" />
