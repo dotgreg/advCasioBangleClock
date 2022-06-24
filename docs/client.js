@@ -92,7 +92,7 @@ function removeOptions() {
 // reload select list 
 const reloadTextOptionsFromLs = () => {
 		removeOptions();
-		const optionsText = [ ...getLsTexts(),...baseOptionsText]
+		const optionsText = [ ...getLsTexts(), ...baseOptionsText]
 		for(var i = 0; i < optionsText.length; i++) {
 				var o = document.createElement("option");
 				o.value = optionsText[i].id
