@@ -1,3 +1,5 @@
+const saveText = document.getElementById("saveTextBtn")
+const selectText = document.getElementById("selectText")
 const textarea = document.getElementById("tasks")
 const locationInput = document.getElementById("location")
 const apiKeyInput = document.getElementById("apikey")
@@ -59,6 +61,66 @@ const mainLogic = () => {
 document.getElementById("btnConnect").addEventListener("click", mainLogic);
 
 /////////////////////////////////////////////
+// SAVE TEXT SYSTEM
+//
+
+let baseOptionsText
+
+// if click on save, prompt for name and add it to ls
+const getLsTexts = () => {
+		let db = localStorage.getItem("textsSaved") 
+		db = db ? JSON.parse(db) : []
+		return db
+}
+const saveTextToLs = () => {
+		let db = getLsTexts()
+		const id = prompt("which name?")
+		db.push({id, text: textarea.value})
+
+		console.log(db);
+		localStorage.setItem("textsSaved", JSON.stringify(db))
+
+		reloadTextOptionsFromLs()
+}
+
+function removeOptions() {
+		var i, L = selectText.options.length - 1;
+		for(i = L; i >= 0; i--) {
+				selectText.remove(i);
+		}
+}
+// reload select list 
+const reloadTextOptionsFromLs = () => {
+		removeOptions();
+		const optionsText = [...baseOptionsText, ...getLsTexts()]
+		for(var i = 0; i < optionsText.length; i++) {
+				var o = document.createElement("option");
+				o.value = optionsText[i].id
+				o.text = optionsText[i].id
+				selectText.add(o, null);
+		}
+}
+setTimeout(() => {
+		reloadTextOptionsFromLs()
+})
+// on select list option, fill textarea value
+const onTextSelect = () => {
+		// console.log(selectText.value);
+		const optionsText = [...baseOptionsText, ...getLsTexts()]
+		for(var i = 0; i < optionsText.length; i++) {
+				if (optionsText[i].id === selectText.value) {
+						// textarea.value = optionsText[i].text.replaceAll("\\", "wooop")
+						// textarea.value = optionsText[i].text.replace(//g, "\\");
+						textarea.value = optionsText[i].text;
+				}
+		}
+		setTimeout(() => {
+				console.log('lsss');
+				setLs()
+		})
+}
+
+/////////////////////////////////////////////
 // WEATHER
 //
 const getWeather = (location, apikey, cb) => {
@@ -97,22 +159,66 @@ const getWeather = (location, apikey, cb) => {
 
 // sun, cloud, rain, thunder, snow
 const getWeatherCode = (nameIcon) => {
-    const equiv = {
-        '01': 'sun',
-        '02': 'cloud',
-        '03': 'cloud',
-        '04': 'cloud',
-        '09': 'rain',
-        '10': 'rain',
-        '11': 'storm',
-        '50': 'cloud',
-        '13': 'snow',
-    }
-    const nb = nameIcon.substring(0, 2);
-    const nameWeather = equiv[nb]
+		const equiv = {
+				'01': 'sun',
+				'02': 'cloud',
+				'03': 'cloud',
+				'04': 'cloud',
+				'09': 'rain',
+				'10': 'rain',
+				'11': 'storm',
+				'50': 'cloud',
+				'13': 'snow',
+		}
+		const nb = nameIcon.substring(0, 2);
+		const nameWeather = equiv[nb]
 
 		const codes = ["sun", "cloud", "rain", "thunder", "snow"]
 		let code = codes.indexOf(nameWeather)
-    return code;
+		return code;
 }
 
+///////////////////////////////
+// ASCII DEFAULT 
+baseOptionsText = [
+		{id:"-- saved texts --", text:""},
+		{id: "ascii-skull",
+		 text:String.raw`
+   ____
+ ,'   Y'.
+/        \
+\ ()  () /
+ '. /\\ ,'
+8=| "" |=8
+  'LLLU'
+`},
+		{id: "ascii-linux",
+		 text:String.raw`
+   /---\
+   |o_o|
+   |:_/|
+  //   \\
+ (|     |)
+ /\_   _/\
+ \__)=(__/
+
+`},
+		{id: "ascii-computer",
+		 text:`
+  .----.
+  |C>_ |
+ _|____|_
+| ______-|
+\`/.::::.\'
+\`--------'
+`},
+		{id: "ascii-joysticks",
+		 text:String.raw`
+   (  )
+    ||
+    ||
+ __|""|__
+/_________\
+\_________/~~~.
+`},
+]

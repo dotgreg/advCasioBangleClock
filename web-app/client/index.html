@@ -1,32 +1,42 @@
 <html lang="en-US">
 	<head>
-		<title>Advanced Casio Web App</title>
+		<title>Advanced Casio Companion Web App</title>
 		<meta charset="utf-8" name="viewport" 
 					content= "width=device-width, initial-scale=1.0">
 	</head>
 	<body>
-		<h2>Advanced Casio Web App</h2>
-		<h3> Scratchpad content </h3>
-		<textarea
-			onkeyup="onInputChange()"
-			id="tasks"
-			rows="7" cols="9" maxlength="85"></textarea>
+		<h2>Advanced Casio Companion Web App</h2>
+		<div class="scratchpad-wrapper wrapper">
+			<h3> Scratchpad content </h3>
+			<div class="scratchpad-btns">
+				<select id="selectText" onchange="onTextSelect()"></select>
+				<br/>
+				<button id="saveTextBtn" onclick="saveTextToLs()">save current text</button>
+			</div>
+
+			<textarea
+				onkeyup="onInputChange()"
+				id="tasks"
+				rows="7" cols="9" maxlength="85"></textarea>
 
 
-		<br/>
-		<br/>
+			<br/>
+			<br/>
+		</div>
 		<button id="btnConnect">Sync to your Bangle</button>
 		<div id="logs"></div>
 
-		<h3>Weather</h3>
-		location :
-		<input onkeyup="onInputChange()" type="text" placeholder="paris, france" id="location"/>
-		<br/>
+		<div class="weather-wrapper wrapper">
+			<h3>Weather</h3>
+			location :<br>
+			<input onkeyup="onInputChange()" type="text" placeholder="paris, france" id="location"/>
+			<br/>
 
-		openweathermap api key:
-		<input onkeyup="onInputChange()" type="text" placeholder="" id="apikey"/>
+			openweathermap api key:<br>
+			<input onkeyup="onInputChange()" type="text" placeholder="" id="apikey"/>
+		</div>
 
-		
+
 		<script src="https://www.puck-js.com/puck.js"></script>
 		<script src="./client.js"></script>
 		<style>
@@ -35,9 +45,15 @@
 			}
 			h1,h2,h3 {
 			}
+			#btnConnect {
+					padding: 11px;
+			}
 			textarea {
-				  word-wrap: initial;
+					word-wrap: initial;
 					word-break: break-all;
+			}
+			.scratchpad-btns {
+					/* display: flex; */
 			}
 			#logs {
 					background: black;
@@ -45,8 +61,14 @@
 					color: green;
 					max-height: 120px;
 					overflow-y: scroll;
-					margin: 10px;
-					padding: 10px;
+					margin: 10px 0px;
+					padding: 10px 0px;
+			}
+			.wrapper {
+					background: gainsboro;
+					padding: 15px;
+					max-width: 240px;
+					margin-bottom: 10px;
 			}
 		</style>
 	</body>
