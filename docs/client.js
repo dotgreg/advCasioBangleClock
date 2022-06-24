@@ -92,7 +92,7 @@ function removeOptions() {
 // reload select list 
 const reloadTextOptionsFromLs = () => {
 		removeOptions();
-		const optionsText = [...baseOptionsText, ...getLsTexts()]
+		const optionsText = [ ...getLsTexts(),...baseOptionsText]
 		for(var i = 0; i < optionsText.length; i++) {
 				var o = document.createElement("option");
 				o.value = optionsText[i].id
@@ -105,12 +105,9 @@ setTimeout(() => {
 })
 // on select list option, fill textarea value
 const onTextSelect = () => {
-		// console.log(selectText.value);
-		const optionsText = [...baseOptionsText, ...getLsTexts()]
+		const optionsText = [ ...getLsTexts(),...baseOptionsText]
 		for(var i = 0; i < optionsText.length; i++) {
 				if (optionsText[i].id === selectText.value) {
-						// textarea.value = optionsText[i].text.replaceAll("\\", "wooop")
-						// textarea.value = optionsText[i].text.replace(//g, "\\");
 						textarea.value = optionsText[i].text;
 				}
 		}
