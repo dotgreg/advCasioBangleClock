@@ -175,7 +175,7 @@ function drawWeather(arr) {
 //
 function drawTasks(str) {
 		g.setFont("6x8", 1);
-		var t = 60;
+		var t = 57;
 		var l = 0;
 		g.drawString(str, l+5, t+0);
 }
