@@ -1,3 +1,10 @@
+# STATUS
+
+/!\ As my watch unfortunately broke, I will discontinue that project as I am not using it anymore and am unable to test it on a real device. /!\
+
+Thanks for your interest!
+
+
 # Adv Casio Clock
 
 <img src="https://user-images.githubusercontent.com/2981891/175355586-1dfc0d66-6555-4385-b124-1605fdb71a11.jpg" width="250" />
