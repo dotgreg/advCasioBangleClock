@@ -135,7 +135,7 @@ window.bangle_app_flash = `const storage = require('Storage');
 						return res;
 				}
 
-				var dataJsonInt = {"tasks":"", "weather":[]};
+				// var dataJsonInt = {"tasks":"", "weather":[]};
 				function setDataJson(resJson){
 						dataJsonInt = resJson;
 				}
