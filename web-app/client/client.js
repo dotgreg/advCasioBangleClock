@@ -20,13 +20,83 @@ const syncToBangle = (fileName, jsonObj) => {
 				jsonObj.tasks = jsonObj.tasks.match(/.{1,11}/g).join("\n")
 		}
 		const content = JSON.stringify(jsonObj)
-		log(`starting syncing process`);
+		log(`starting syncing process2`);
 		setTimeout(function() {
-				log(`writing "${content}" to ${fileName}`);
-				Puck.eval(`require("Storage").writeJSON("${fileName}", ${content})`,function(x) {
-						if (x === true) log("BANGLE => Writing success!")
-						else log(x);
-				})
+				log(`writing2 "${content}" to ${fileName}`);
+				// Puck.eval(`require("Storage").writeJSON("${fileName}", ${content})`,function(x) {
+				// 		if (x === true) log("BANGLE => Writing success!")
+				// 		else log(x);
+				// })
+				// Puck.eval(`g.clear();g.setColor(255, 255, 0);g.fillRect(0, 0, g.getWidth(), g.getHeight());")`,function(x) {
+
+
+				// WORKING 1
+				const execOne = (cmd ) => {
+						Puck.eval(cmd,function(x) {
+								if (x === true) log("BANGLE => [OK] :", cmd)
+								else log(x);
+						})
+				}
+				const exec = (cmd) => {
+						console.log("EXEC => ", cmd);
+						Puck.write(`${cmd}\n`,function(x) {
+								if (x === true) log("BANGLE => [OK] : write")
+								else log(x);
+						})
+				}
+				// exec("g.clear()");
+				// exec("g.setColor(0,100,0)");
+				// exec("g.fillRect(0, 0, g.getWidth(), g.getHeight())");
+
+				// WORKING 2
+				// Puck.write(`g.clear();g.setColor(0, 0, 255);g.fillRect(0, 0, g.getWidth(), g.getHeight());\n`,function(x) {
+				// 		if (x === true) log("BANGLE => [OK] : write")
+				// 		else log(x);
+				// })
+
+				// WORKING 3
+				// g.reset();g.clear();g.setColor(255, 255, 0);g.fillRect(0, 0, g.getWidth(), g.getHeight());
+
+				// NOPE => modules require ne sont pas ajoutés
+				// const exec = (cmd) => {
+				// 		Puck.write(`${cmd}\n`,function(x) {
+				// 				if (x === true) log("BANGLE => [OK] : write")
+				// 				else log(x);
+				// 		})
+				// }
+				// // exec(`${window.bangle_app_flash.toString()}()\n;`)
+				// const toExec = bangle_app_flash.toString().replaceAll('\n','').replaceAll('\t','');
+				// exec(`${toExec}\n;`)
+
+
+				// WORKING BUT NOT PRACTICAL
+				// const toExec = window.bangle_app_flash2;
+				// exec(`${toExec}\n;`)
+
+
+				const rmJump = (str) => {
+						return str.replaceAll('\n','').replaceAll('\t','');
+				}
+				const app = rmJump(window.bangle_app_flash);
+				const app2 = window.bangle_app_flash;
+				const header = window.bangle_app_flash_header;
+				const simple = window.bangle_app_flash_simple;
+				const final = `${header}${app}\n\n;`
+				// exec(`${header_exec}${exec_app}\n\n;`)
+				// console.log(final);
+
+				// WORKING no error
+				// exec(`${window.bangle_app_flash_header}\n\n;`)
+
+
+				// WORKING no error
+				// exec(`${window.bangle_app_flash_header}${simple}\n\n;`)
+
+				// WORKING
+				// exec(`${header}${simple}\n\n;`)
+
+				// WORKING
+				exec(`${header}${app2}\n\n;`)
 		})
 }
 
