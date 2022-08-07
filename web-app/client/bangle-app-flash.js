@@ -1,4 +1,8 @@
-window.bangle_app_flash = `const storage = require('Storage');
+window.bangle_app_flash = `var opt = {
+  dev: false,
+};
+
+const storage = require('Storage');
 
 		require("Font6x12").add(Graphics);
 		require("Font6x8").add(Graphics);
@@ -11,10 +15,6 @@ window.bangle_app_flash = `const storage = require('Storage');
 				x += g.stringWidth(big);
 				g.setFont("8x12");
 				g.drawString(small, x, y);
-		}
-
-		function getClockBg() {
-				return require("heatshrink").decompress(atob("icVgf/ABv8v4DBx4CB+PH8F+nAGB48fwEHBwXjxwqBuPH//+nAGBBwIjCAwI2D/wGBgIyDI4QGDwAGBHYX/4AGBn4UFEYQpCEYYpCAAMfMhP4FIgABwJ8OEBIA=="));
 		}
 
 
@@ -49,93 +49,18 @@ window.bangle_app_flash = `const storage = require('Storage');
 				drawTimeout = undefined;
 		}
 
-		////////////////////////////////////////////
-		// TIMER FUNC
-		//
-		var timer_time = 0;
-		var alreadyListenTouch = false;
-		function initTouchTimer () {
-				if (alreadyListenTouch) return;
-				alreadyListenTouch = true;
-				
-				Bangle.on('swipe', function(dirX,dirY) {
-						if (canTouch === false) return;
-						var njson = getDataJson();
-						if (!njson) return;
-						
-						if (dirX === -1) {
-								timer_time = 0;
-								delete njson.timer;
-								setDataJson(njson);
-						}
-						else if (dirX === 1) { 
-								var now = new Date().getTime();
-								njson.timer = now + (timer_time * 1000 * 60);
-								Bangle.setLocked(true);
-								setDataJson(njson);
-								Bangle.buzz(200, 0);
-								timer_time = 0;
-						}
-						else if (dirY === -1) { 
-								if (canTouch === false || njson.timer) return;
-								timer_time = timer_time + 5;
-						}
-						else if (dirY === 1) { 
-								if (canTouch === false || njson.timer) return;
-								timer_time = timer_time - 5;
-						}
-						draw();
-				});
-		}
-		setTimeout(() => {
-				initTouchTimer ();
-		});
-
-		function getTimerTime() {
-				// if timer_time !== -1, take it
-				if (timer_time !== 0) {
-						return timer_time + "m";
-				} else {
-						// else, show diff between njsontime and now
-						var njson = getDataJson();
-						if (!njson) return false;
-						var now = new Date().getTime();
-						var diff = Math.round((njson.timer - now) / (1000 * 60));
-						//console.log(123, njson, diff, now, njson.timer - now);
-						if (diff > 0) return diff + "m";
-						else if (njson.timer) {
-								Bangle.buzz(1000, 1);
-								console.log("END OF TIMER");
-								delete njson.timer;
-								setDataJson(njson);
-								return false;
-						} else {
-								return false;
-						}
-						// if diff is <0, delete timer from json
-				}
-		}
-		function drawTimer() {
-				//g.drawString(getTimerTime(), 100, 100);
-				g.setFont("8x12", 2);
-				var t = 97;
-				var l = 105;
-				var time = getTimerTime();
-				if (time || timer_time !== 0) g.drawString(time, l+5, t+0);
-				if (time && timer_time === 0) g.drawImage(getClockBg(), l-20, t+2, { scale: 1 });
-		}
 
 
 		////////////////////////////////////////////
 		// DATA READING
 		//
+        if (opt.dev) var dataJsonInt = {"tasks":"", "weather":[]};
 				function getDataJson(){
 						var res = {"tasks":"", "weather":[]};
 						res = dataJsonInt;
 						return res;
 				}
 
-				// var dataJsonInt = {"tasks":"", "weather":[]};
 				function setDataJson(resJson){
 						dataJsonInt = resJson;
 				}
@@ -157,7 +82,7 @@ window.bangle_app_flash = `const storage = require('Storage');
 						if (arr[i][2] > yesterday && j < 4) {
 								g.drawString(arr[i][0], p.l + p.decal*j + 4, p.tText);
 								g.drawImage(iconsWeather[arr[i][1]], p.l + p.decal*j, p.tIcon, { scale: 1 });
-								j++
+								j++;
 						}
 				}
 		}
@@ -257,7 +182,9 @@ window.bangle_app_flash = `const storage = require('Storage');
 
 				g.setFontAlign(0,-1);
 				g.setFont("8x12", 2);
-
+  
+        updateTimedLogic();
+      
 				drawSteps();
 				g.setFontAlign(-1,-1);
 				drawClock();
@@ -265,6 +192,8 @@ window.bangle_app_flash = `const storage = require('Storage');
 				drawTimer();
 				// Hide widgets
 				for (let wd of WIDGETS) {wd.draw=()=>{};wd.area="";}
+      
+        
 		}
 
 		// save batt power, does not seem to work although...
@@ -295,75 +224,71 @@ window.bangle_app_flash = `const storage = require('Storage');
 
 
 var lastTime = 0;
-function throttle(func, timeFrame) {
+function throttle(func1, timeFrame) {
     var now = Date.now();
     if (now - lastTime >= timeFrame) {
-        func();
+        func1();
         lastTime = now;
     }
 }
 
 
 var timeout;
-function debounce(func, wait) {
+function debounce(func2, wait) {
 		
-		return function(func, wait) {
+		return function() {
 				if (timeout) clearTimeout(timeout);
-				console.log("debounce!");
+				//if (opt.dev) console.log("debounce!");
 				timeout = setTimeout(function(){
-						func();
+						func2();
 				}, wait);
 		};
 }
 var debouncedLcd = debounce(function(){
 		Bangle.setLCDBrightness(0);
-}, 3000);
+}, 8000);
 
 /////////////////////////////////////
 // NO BTN1 + CUSTOM INTERACTIONS
 
+var accumY = 0;
+var treshY = 20;
 
 Bangle.setUI({
 		mode : "custom",
 		drag : function(e) {
-				throttle(function(){
-						if (e.dy < 0) {
-								increment(1);
-						} else if (e.dy > 0) {
-								increment(-1);
-						}
-				}, 400);
+        accumY = accumY+e.dy;
+        if (Math.abs(accumY) > treshY) {
+          var dir = accumY > 0 ? -1 : 1;
+          accumY = 0;
+          increment(dir);
+        }
 		},
 		btn : function(n) {
-				//Bangle.buzz(1000, 1);
-				//console.log("TOUCH", button);
 				Bangle.setLCDBrightness(1);
 				debouncedLcd();
+        //if (one
+        onBtn();
 		},
 });
 
-//Bangle.on('tap', function(data) { 
-//  console.log(122, data);
-//});
-
 // TOUCH BTN
 Bangle.on('touch', function(button, xy) { 
-		//Bangle.buzz(1000, 1);
-		//console.log("TOUCH", button);
 		ontouch();
 });
 
 
 ////////////////
-// selection mode > 
+// selection mode >
 // scroll choose mode > tap > scroll time1 > tap > scroll time2 > tap
-// to disable 
+// to disable
 var modes = ["countdown", "alarm", ""];
 
 function increment(dir) {
 		debouncedLcd();
 		// 0 => MODE SELECTION
-		if (!selected.mode) {
+		if (selected.mode === null) {
+        cleanSelected();
 				if (
 						curr.mode + dir < modes.length && 
 								curr.mode + dir >= 0
@@ -372,66 +297,80 @@ function increment(dir) {
 		
 		// 1 => ALARM
 		else if (selected.mode === 1) {
-				if (!selected.alarm_hour) {
-						if (
-								curr.alarm_hour + dir < 23 && 
-										curr.alarm_hour + dir >= 0
-						) curr.alarm_hour = curr.alarm_hour + dir;
+				if (selected.alarm_hour === null) {
+            curr.alarm_hour = curr.alarm_hour + dir;
+            if (curr.alarm_hour >= 23) curr.alarm_hour = 0;
+            if (curr.alarm_hour < 0) curr.alarm_hour = 23;
 				}
-				else if (!selected.alarm_min) {
-						if (
-								curr.alarm_min + dir < 60 && 
-										curr.alarm_min + dir >= 0
-						) curr.alarm_min = curr.alarm_min + (dir*5);
-				}
+				else if (selected.alarm_min === null) {
+            curr.alarm_min = curr.alarm_min + (dir*5);
+            if (curr.alarm_min >= 60) curr.alarm_min = 0;
+            if (curr.alarm_min < 0) curr.alarm_min = 55;
+				} else {
+          selected.mode = null;
+        }
 		}
 		
 		// 2 => COUNTDOWN
 		else if (selected.mode === 2) {
-				if (!selected.countdown) {
+				if (selected.countdown === null) {
 						if (
 								curr.countdown + dir < 200 && 
 										curr.countdown + dir >= 0
 						) curr.countdown = curr.countdown + (dir*5);
 				}
+        else {
+          selected.mode = null;
+        }
 		}
-		
-		
-		//Bangle.buzz(100, 0);
+  
+
 		var log = {dir:dir, selected:selected, curr:curr};
-		redraw();
-		console.log("SCROLL", log );
+		forceRedraw();
+		if (opt.dev) console.log("SCROLL", log );
 }
 function ontouch () {
 		debouncedLcd();
 		// 0 => MODE SELECTION
-		if (!selected.mode) {
+		if (selected.mode === null) {
 				selected.mode = curr.mode;
 				cleanSelected();
 		}
 		
 		// 1 => ALARM
-		else if (selected.mode === 1 && !selected.alarm_hour) selected.alarm_hour = curr.alarm_hour;
-		else if (selected.mode === 1 && selected.alarm_hour && !selected.alarm_min) selected.alarm_min = curr.alarm_min;
+		else if (selected.mode === 1 && selected.alarm_hour === null) selected.alarm_hour = curr.alarm_hour;
+		else if (selected.mode === 1 && selected.alarm_hour !== null && selected.alarm_min === null) { 
+      selected.alarm_min = curr.alarm_min;
+      // find the timestamp of the wakeup
+      findAlarmTimestamp();
+    }
 		
 		
 		// 2 => COUNTDOWN
-		else if (selected.mode === 2 && !selected.countdown) {
+		else if (selected.mode === 2 && selected.countdown === null) {
 				selected.countdown = curr.countdown;
 				selected.countdown_timestamp = new Date().getTime() + curr.countdown * 60 * 1000;
 		}
 		
 		// 0 => MODE SELECTION RESET
-		else if (selected.mode) selected.mode = null;
+		else if (selected.mode !== null) {
+      selected.mode = null;
+    }
 		
 		var log = {selected:selected, curr:curr};
 		
-		console.log("TOUCH", log );
-		redraw();
+		if (opt.dev) console.log("TOUCH", log );
+		forceRedraw();
 }
+
+function onBtn() {
+  snoozeAlarm();
+}
+
 function cleanSelected () {
 		selected.alarm_hour = null;
 		selected.alarm_min = null;
+    selected.alarm_timestamp = null;
 		selected.countdown = null;
 		selected.countdown_timestamp = null;
 } 
@@ -439,6 +378,7 @@ var selected = {
 		mode: null,
 		alarm_hour: null,
 		alarm_min: null,
+    alarm_timestamp: null,
 		countdown: null,
 		countdown_timestamp: null
 };
@@ -449,34 +389,134 @@ var curr = {
 		countdown: 0
 };
 
+
+//////////
+// COUNTDOWN LOGIC
+
+function updateCountdown() {
+  if (selected.mode !== 2 || selected.countdown_timestamp === null) return;
+  var now = new Date().getTime();
+  var diff = Math.round((selected.countdown_timestamp - now) / (1000 * 60));
+  if (opt.dev) console.log("COUNTDOWN UPDATE", now, diff);
+  if (diff > 0)  selected.countdown = diff ;
+  else if (selected.countdown_timestamp !== null) {
+      Bangle.buzz(1000, 1);
+      if (opt.dev) console.log("COUNTDOWN > END!!@!");
+      cleanSelected();
+  } 
+}
+
+//////////
+// ALARM LOGIC
+
+var snoozeStatus = false;
+function ringAlarm () {
+  if (opt.dev) console.log("ALARM RING");
+  var inter = setInterval(function() { 
+    if (opt.dev) console.log("ALARM RING > buzz");
+    if (snoozeStatus) clearInterval(inter);
+    Bangle.buzz(500, 1); 
+  }, 2000);
+}
+
+function snoozeAlarm() {
+  if (!selected.alarm_timestamp) return;
+  if (new Date().getTime() < selected.alarm_timestamp) return;
+  selected.alarm_timestamp = selected.alarm_timestamp + (5 * 60 *1000);
+  if (selected.alarm_min < 55) {
+    selected.alarm_min = selected.alarm_min + 5;
+  } else {
+    selected.alarm_min = 0;
+    if (selected.alarm_hour < 23) {
+      selected.alarm_hour = selected.alarm_hour + 1;
+    } else {
+      selected.alarm_hour = 0;
+    }
+  }
+  snoozeStatus = true;
+  forceRedraw();
+  if (opt.dev) console.log("ALARM SNOOZE", selected);
+}
+
+function updateAlarm() {
+  if (selected.mode !== 1 || selected.alarm_hour === null || selected.alarm_min === null) return;
+  
+  var now = new Date().getTime();
+  var diff = Math.round((selected.alarm_timestamp - now) / (1000 * 60));
+  if (opt.dev) console.log("ALARM UPDATE", now, diff);
+  if (diff > 0)  { 
+    //selected.alarm = diff ;
+  }
+  else if (selected.alarm_timestamp !== null) {
+      snoozeStatus = false;
+      ringAlarm();
+  } 
+}
+
+function findAlarmTimestamp () {
+  var p = {
+    cHour : new Date().getHours(),
+    cMin : new Date().getMinutes(),
+    aHour : selected.alarm_hour,
+    aMin : selected.alarm_min,
+    isNextDay : false
+  };
+      
+  if (p.aHour >= p.cHour) p.isNextDay = false;
+  else if (p.aHour === p.cHour && p.aMin >= p.cMin) p.isNextDay = false;
+  else p.isNextDay = true;
+  
+  var tempDate = new Date();
+  if (p.isNextDay) tempDate.setDate(tempDate.getDate() + 1);
+  var t = tempDate;
+  
+  p.aDate = new Date(t.getFullYear(), t.getMonth(), t.getDate(), p.aHour, p.aMin);
+  selected.alarm_timestamp = p.aDate.getTime();
+  
+  if (opt.dev) console.log("ALARM => findAlarmTimestamp", p, selected);
+}
+
 //////////
 // DISPLAY
 
 function getTimerTime() {
     var modeStatus = curr.mode === selected.mode ? "" : ">";
-    var header = modeStatus+curr.mode+" ";
+    var modeStr = curr.mode === 1 ? "A":"C";
+    var header = modeStatus+modeStr+" ";
 		if (!curr.mode) {
 				return "";
 		} else if (curr.mode === 1){
-        var hStatus = selected.mode && !selected.alarm_hour && !selected.alarm_min ? ">" : "";
-        var mStatus = selected.mode && selected.alarm_hour && !selected.alarm_min ? ">" : "";
-        return header+hStatus+curr.alarm_hour + ":"+mStatus+ curr.alarm_min;
+        var hStatus = selected.mode !== null && selected.alarm_hour === null && selected.alarm_min === null ? ">" : "";
+        var mStatus = selected.mode !== null && selected.alarm_hour !== null && selected.alarm_min === null ? ">" : "";
+        var hour = selected.alarm_hour === null ? curr.alarm_hour :  selected.alarm_hour;
+        var min = selected.alarm_min === null ? curr.alarm_min :  selected.alarm_min;
+        return header+hStatus+hour + ":"+mStatus+ min;
 		} else if (curr.mode === 2){
-        return header+curr.countdown + "m";
+        var countStatus = curr.countdown;
+        if (selected.mode === 2 && selected.countdown === null) {
+          countStatus = ">"+curr.countdown;
+        } else if (selected.mode === 2 && selected.countdown !== null) {
+          countStatus = ""+selected.countdown;
+        }
+        return header+countStatus + "m";
 		}
 }
 function drawTimer() {
-    console.log("DRAW TIMER");
+    //if (opt.dev) console.log("DRAW TIMER");
 		g.setFont("8x12", 2);
 		var t = 97;
-		var l = 105;
+		var l = 85;
 		var time = getTimerTime();
-		if (time || timer_time !== 0) g.drawString(time, l+5, t+0);
-		if (time && timer_time === 0) g.drawImage(getClockBg(), l-20, t+2, { scale: 1 });
+		g.drawString(time, l+5, t+0);
+}
+
+function updateTimedLogic () {
+  updateCountdown();
+  updateAlarm();
 }
 
 
-function redraw() {
+function forceRedraw() {
 		g.reset();
 		g.clear();
 		draw();
@@ -501,9 +541,10 @@ Bangle.setLCDBrightness(0);
 // force lower Bluetooth connection speed
 NRF.setConnectionInterval(100); 
 
-redraw();
+forceRedraw();
 
 `
+
 window.bangle_app_flash_simple = `g.reset();g.clear();g.setColor(0, 255, 0);g.fillRect(0, 0, g.getWidth(), g.getHeight())`;
 
 
