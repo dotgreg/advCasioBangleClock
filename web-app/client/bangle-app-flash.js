@@ -290,15 +290,222 @@ window.bangle_app_flash = `const storage = require('Storage');
 		});
 
 
-		// Load widgets, but don't show them
-		Bangle.loadWidgets();
-		Bangle.setUI("clock");
+////////////////////////////////////
+// NEW CODE
 
+
+var lastTime = 0;
+function throttle(func, timeFrame) {
+    var now = Date.now();
+    if (now - lastTime >= timeFrame) {
+        func();
+        lastTime = now;
+    }
+}
+
+
+var timeout;
+function debounce(func, wait) {
+		
+		return function(func, wait) {
+				if (timeout) clearTimeout(timeout);
+				console.log("debounce!");
+				timeout = setTimeout(function(){
+						func();
+				}, wait);
+		};
+}
+var debouncedLcd = debounce(function(){
+		Bangle.setLCDBrightness(0);
+}, 3000);
+
+/////////////////////////////////////
+// NO BTN1 + CUSTOM INTERACTIONS
+
+
+Bangle.setUI({
+		mode : "custom",
+		drag : function(e) {
+				throttle(function(){
+						if (e.dy < 0) {
+								increment(1);
+						} else if (e.dy > 0) {
+								increment(-1);
+						}
+				}, 400);
+		},
+		btn : function(n) {
+				//Bangle.buzz(1000, 1);
+				//console.log("TOUCH", button);
+				Bangle.setLCDBrightness(1);
+				debouncedLcd();
+		},
+});
+
+//Bangle.on('tap', function(data) { 
+//  console.log(122, data);
+//});
+
+// TOUCH BTN
+Bangle.on('touch', function(button, xy) { 
+		//Bangle.buzz(1000, 1);
+		//console.log("TOUCH", button);
+		ontouch();
+});
+
+
+////////////////
+// selection mode > 
+// scroll choose mode > tap > scroll time1 > tap > scroll time2 > tap
+// to disable 
+var modes = ["countdown", "alarm", ""];
+
+function increment(dir) {
+		debouncedLcd();
+		// 0 => MODE SELECTION
+		if (!selected.mode) {
+				if (
+						curr.mode + dir < modes.length && 
+								curr.mode + dir >= 0
+				) curr.mode = curr.mode + dir;
+		}
+		
+		// 1 => ALARM
+		else if (selected.mode === 1) {
+				if (!selected.alarm_hour) {
+						if (
+								curr.alarm_hour + dir < 23 && 
+										curr.alarm_hour + dir >= 0
+						) curr.alarm_hour = curr.alarm_hour + dir;
+				}
+				else if (!selected.alarm_min) {
+						if (
+								curr.alarm_min + dir < 60 && 
+										curr.alarm_min + dir >= 0
+						) curr.alarm_min = curr.alarm_min + (dir*5);
+				}
+		}
+		
+		// 2 => COUNTDOWN
+		else if (selected.mode === 2) {
+				if (!selected.countdown) {
+						if (
+								curr.countdown + dir < 200 && 
+										curr.countdown + dir >= 0
+						) curr.countdown = curr.countdown + (dir*5);
+				}
+		}
+		
+		
+		//Bangle.buzz(100, 0);
+		var log = {dir:dir, selected:selected, curr:curr};
+		redraw();
+		console.log("SCROLL", log );
+}
+function ontouch () {
+		debouncedLcd();
+		// 0 => MODE SELECTION
+		if (!selected.mode) {
+				selected.mode = curr.mode;
+				cleanSelected();
+		}
+		
+		// 1 => ALARM
+		else if (selected.mode === 1 && !selected.alarm_hour) selected.alarm_hour = curr.alarm_hour;
+		else if (selected.mode === 1 && selected.alarm_hour && !selected.alarm_min) selected.alarm_min = curr.alarm_min;
+		
+		
+		// 2 => COUNTDOWN
+		else if (selected.mode === 2 && !selected.countdown) {
+				selected.countdown = curr.countdown;
+				selected.countdown_timestamp = new Date().getTime() + curr.countdown * 60 * 1000;
+		}
+		
+		// 0 => MODE SELECTION RESET
+		else if (selected.mode) selected.mode = null;
+		
+		var log = {selected:selected, curr:curr};
+		
+		console.log("TOUCH", log );
+		redraw();
+}
+function cleanSelected () {
+		selected.alarm_hour = null;
+		selected.alarm_min = null;
+		selected.countdown = null;
+		selected.countdown_timestamp = null;
+} 
+var selected = {
+		mode: null,
+		alarm_hour: null,
+		alarm_min: null,
+		countdown: null,
+		countdown_timestamp: null
+};
+var curr = {
+		mode: 0,
+		alarm_hour: 0,
+		alarm_min: 0,
+		countdown: 0
+};
+
+//////////
+// DISPLAY
+
+function getTimerTime() {
+    var modeStatus = curr.mode === selected.mode ? "" : ">";
+    var header = modeStatus+curr.mode+" ";
+		if (!curr.mode) {
+				return "";
+		} else if (curr.mode === 1){
+        var hStatus = selected.mode && !selected.alarm_hour && !selected.alarm_min ? ">" : "";
+        var mStatus = selected.mode && selected.alarm_hour && !selected.alarm_min ? ">" : "";
+        return header+hStatus+curr.alarm_hour + ":"+mStatus+ curr.alarm_min;
+		} else if (curr.mode === 2){
+        return header+curr.countdown + "m";
+		}
+}
+function drawTimer() {
+    console.log("DRAW TIMER");
+		g.setFont("8x12", 2);
+		var t = 97;
+		var l = 105;
+		var time = getTimerTime();
+		if (time || timer_time !== 0) g.drawString(time, l+5, t+0);
+		if (time && timer_time === 0) g.drawImage(getClockBg(), l-20, t+2, { scale: 1 });
+}
+
+
+function redraw() {
 		g.reset();
 		g.clear();
 		draw();
+}
+
+
+// Load widgets, but don't show them
+Bangle.loadWidgets();
+
+// DISABLE CLICK TO MENU
+//Bangle.setUI("clock");
+
+// POWER SPARING
+// 0.52mA - around 30 days if left like this
+//Bangle.accelWr(0x18,0x0A);
+Bangle.accelWr(0x18,0b11101100);
+// 0.7mA lower poll frequency (this handles watchdog so must be run at some point)
+Bangle.setPollInterval(1000); 
+// force LCD off
+//Bangle.setLCDPower(0); 
+Bangle.setLCDBrightness(0); 
+// force lower Bluetooth connection speed
+NRF.setConnectionInterval(100); 
+
+redraw();
+
 `
 window.bangle_app_flash_simple = `g.reset();g.clear();g.setColor(0, 255, 0);g.fillRect(0, 0, g.getWidth(), g.getHeight())`;
 
 
-window.bangle_app_flash_header = `\u0010reset();\n\u0010print()\n\u0010setTime(1659716579.868);E.setTimeZone(2)\n\u0010Modules.addCached(\"Font7x11Numeric7Seg\",function(){exports.add=function(a){a.prototype.setFont7x11Numeric7Seg=function(){this.setFontCustom(atob(\"AAAAAAAAAAAAAAAEAIAQAgAAAAAIAHvQBgDAGAL3gAAAAAAAAAAHvAAA9CGEMIYQvAAAACEMIYQwhe8AB4AIAQAgBA94ADwIQwhhDCEDwAHvQhhDCGEIHgAAAgBACAEAHvAAe9CGEMIYQveAA8CEMIYQwhe8AAABjDGAAAA96EEIIQQge8AB7wIQQghBCB4AD3oAwBgDAEAAAAPAhBCCEEL3gAPehDCGEMIQAAAe9CCEEIIQAAAA\"),32,atob(\"BwAAAAAAAAAAAAAAAAcCAAcHBwcHBwcHBwcFAAAAAAAABwcHBwcH\"),11)}}});\n\u0010Modules.addCached(\"Font6x8\",function(){var a=atob(\"AAAAAPoAwADAAFhw2HDQAGSS/5JMAGCW+LzSDAxSolIMEsAAPEKBAIFCPABIMOAwSAAQEHwQEAABBgAQEBAQAAIAAwwwwAB8ipKifABA/gBChoqSYgCEkrLSjAAYKEj+CADkoqKinAA8UpKSDACAgI6wwABskpKSbABgkpKUeAAiAAEmABAoRAAoKCgoKABEKBAAQIqQYAA8WqW9RDgOOMg4DgD+kpKSbAB8goKCRAD+goJEOAD+kpKCAP6QkIAAfIKCklwA/hAQEP4A/gAMAgIC/AD+EChEggD+AgICAP5AIED+AP7AMAz+AHyCgoJ8AP6QkJBgAHyChoN8AP6QmJRiAGSSkpJMAICA/oCAAPwCAgL8AOAYBhjgAPAOMA7wAMYoECjGAMAgHiDAAI6SosIA/4EAwDAMAwCB/wBAgEAAAQEBAQEBEn6SggQABCoqHgD+IiIcABwiIhQAHCIi/gAcKioYACB+oIAAGCUlPgD+ICAeAL4AAQG+AP4IFCIA/AIAPiAeIB4APiAgHgAcIiIcAD8kJBgAGCQkPwA+ECAgABIqKiQAIPwiADwCAjwAIBgGGCAAOAYIBjgAIhQIFCIAIRkGGCAAJioyIgAQboEA5wCBbhAAQIDAQIAAPFqlpUI8\"),\u001b\nb=atob(\"BAIEBgYGBgIEBAYGAwUCBQYDBgYGBgYGBgYCAwQGBAUGBgYGBgUFBgYCBgYFBgYGBgYGBgYGBgYGBgUDBQMEBgYFBQUFBQUFBQIEBQMGBQUFBQUFBAUGBgYGBQQCBAYG\");exports.add=function(c){c.prototype.setFont6x8=function(){this.setFontCustom(a,32,b,8)}}});\n\u0010\u001b[2dModules.addCached(\"Font6x12\",function(){var a=atob(\"AAAAAAAAfkAAwAAAwAAAEQf8EQf8EQAAGIJEf+JEE4AAMMMQBgCMMMAAM4TEMkB8AEwAgAAAHwIIQEAAQEIIHwAAFQDgBADgFQBABAHwBABAACAMAABABABABAAAAEAAAcBgGAYAAAP4RESEP4EEIEf8AEMMQUQkPEIIREREO4DwEQIQf8eISESER4P4SESEB4YAQcTgcAO4REREO4PEQkQoPwCIAAACCMAABACgEQIIAACQCQCQCQIIEQCgBAAAMAQ0RAOAP4TkUUP0P8RARAP8f8REREO4P4QEQEIIf8QEIIHwf8REREQEf8RARAQAP4QEREJ4f8BABAf8QEf8QEAYAEQEf4f8CgEQYMf8AEAEAEf8MADAMAf8f8GABgf8P4QEQEP4f8RARAOAP4QEQEP6f8RQRIOEOIREREI4QAQAf8QAQAAAf4AEAEf4eABwAMBweAf8AYBgAYf8YMGwBAGwYMYAGAB8GAYAQcRkWEYEf8QEAAYAGABgAcQEf8AAIAQAgAQAIAACACACACgAwAAAAYCkCkB8f8CECEB4B4CECEBIB4CECEf8B4CUCUBwCAP8SAQAB4CFCFD+f8CACAB8CET8AEACABT+AAf8BQCIAEQEf8AED8CAD8CAB8D8CACAB8B4CECEB4D/CECEB4B4CECED/D8BACAAABICkCkAYCAP4CECED4AEAED8DAAwAMAwDAD4AEA4AED4CMBQAgBQCMD4AFAFD+CMCUCkDEBAO4QEQEf8AAQEQEO4BAYAwAYAwA\"),\u001b\nb=atob(\"BAIEBgYGBQMEBAUFAwUCBQQEBAQEBAQEBAQCAwUEBQQEBAQEBAQEBAQDBAQEBQQEBAQEBAQGBQUFBQQDBAMFBAMEBAQEBAQEBAMEBAMFBAQEBAQEBAQFBQUEBAQCBAQ=\");exports.add=function(c){c.prototype.setFont6x12=function(){this.setFontCustom(a,32,b,12)}}});\n\u0010\u001b[4dModules.addCached(\"Font8x12\",function(){var a=atob(\"AAAAAAAAAAfkAAwAAAwAAACQf8CQf8CQAAGIJEf+JEE4AAMMMQBgCMMMAAAYMkTEMkAYBkAAwAgAAAHwIIQEAAQEIIHwAABAFQDgBADgFQBABABAHwBABAAAACAMAABABABABABAAAAEAAAEAYAgDAEAYAAAP4QkRESEP4AAEEIEf8AEAAMMQUQUQkPEAAIIQEREREO4AABwCQEQIQf8AAeISESESER4AAH4KESESEB4AAYAQAQcTgcAAAO4REREREO4AAPAQkQkQoPwAACIAAACCMAABACgEQIIAACQCQCQCQCQAAIIEQCgBAAAMAQAQ0RAOAAAP4QETkUUUUP0AAP8RARARAP8AAf8REREREO4AAP4QEQEQEIIAAf8QEQEIIHwAAf8REREREQEAAf8RARARAQAAAP4QEQEREJ4AAf8BABABAf8AAQEf8QEAAAYAEQEf4QAAAf8BACgEQYMAAf8AEAEAEAEAAf8IAEACAEAIAf8AAf8EACABAf8AAP4QEQEQEP4AAf8RARARAOAAAP4QEQEQGP6AAf8RgRQRIOEAAOIREREREI4AAQAQAf8QAQAAAf4AEAEAEf4AAeABwAMBweAAAf8AIAQAgAQAIf8AAYMGwBAGwYMAAYAGAB8GAYAAAQMQ0REWEYEAAf8QEAAMACABgAQAMAAQEf8AAIAQAgAQAIAAAACACACACACAAgAwAAAAYCkCkCkB8AAf8CECECEB4AAB4CECECEBIAAB4CECECEf8AAB4CUCUCUBwAACAP8SAQAAAB4CFCFCFD+AAf8CACACAB8AACET8AEAAACABT+AAf8AgBQCIAEAAQEf8AEAAD8CACAD8CACAB8AAD8CACACAB8AAB4CECECEB4AAD/CECECEB4AAB4CECECED/AAD8BACACACAAABICkCkCkAYAACAP4CECEAAD4AEAEAED8AADAAwAMAwDAAAD4AEAEA4AEAED4AACMBQAgBQCMAAD4AFAFAFD+AACMCUCkDECEAABAO4QEQEAAf8AAQEQEO4BAAAYAgAQAQAIAwAAAAAAAAAAAAA\"),\u001b\nb=atob(\"BQIEBgYGBwMEBAcGAwYCBwYFBgYGBgYGBgYCAwUGBQYHBgYGBgYGBgYEBgYGCAYGBgYGBgYGBggGBgYDBgMGBgMGBgYGBgUGBgQEBgQIBgYGBgYGBQYGCAYGBgUCBQcF\");exports.add=function(c){c.prototype.setFont8x12=function(){this.setFontCustom(a,32,b,12)}}});\n\u0010\u001b[6d`
+const cDate = () => { return Date.now() / 1000 }
+window.bangle_app_flash_header = `\u0010reset();\n\u0010print()\n\u0010setTime(${cDate()});E.setTimeZone(2)\n\u0010Modules.addCached(\"Font7x11Numeric7Seg\",function(){exports.add=function(a){a.prototype.setFont7x11Numeric7Seg=function(){this.setFontCustom(atob(\"AAAAAAAAAAAAAAAEAIAQAgAAAAAIAHvQBgDAGAL3gAAAAAAAAAAHvAAA9CGEMIYQvAAAACEMIYQwhe8AB4AIAQAgBA94ADwIQwhhDCEDwAHvQhhDCGEIHgAAAgBACAEAHvAAe9CGEMIYQveAA8CEMIYQwhe8AAABjDGAAAA96EEIIQQge8AB7wIQQghBCB4AD3oAwBgDAEAAAAPAhBCCEEL3gAPehDCGEMIQAAAe9CCEEIIQAAAA\"),32,atob(\"BwAAAAAAAAAAAAAAAAcCAAcHBwcHBwcHBwcFAAAAAAAABwcHBwcH\"),11)}}});\n\u0010Modules.addCached(\"Font6x8\",function(){var a=atob(\"AAAAAPoAwADAAFhw2HDQAGSS/5JMAGCW+LzSDAxSolIMEsAAPEKBAIFCPABIMOAwSAAQEHwQEAABBgAQEBAQAAIAAwwwwAB8ipKifABA/gBChoqSYgCEkrLSjAAYKEj+CADkoqKinAA8UpKSDACAgI6wwABskpKSbABgkpKUeAAiAAEmABAoRAAoKCgoKABEKBAAQIqQYAA8WqW9RDgOOMg4DgD+kpKSbAB8goKCRAD+goJEOAD+kpKCAP6QkIAAfIKCklwA/hAQEP4A/gAMAgIC/AD+EChEggD+AgICAP5AIED+AP7AMAz+AHyCgoJ8AP6QkJBgAHyChoN8AP6QmJRiAGSSkpJMAICA/oCAAPwCAgL8AOAYBhjgAPAOMA7wAMYoECjGAMAgHiDAAI6SosIA/4EAwDAMAwCB/wBAgEAAAQEBAQEBEn6SggQABCoqHgD+IiIcABwiIhQAHCIi/gAcKioYACB+oIAAGCUlPgD+ICAeAL4AAQG+AP4IFCIA/AIAPiAeIB4APiAgHgAcIiIcAD8kJBgAGCQkPwA+ECAgABIqKiQAIPwiADwCAjwAIBgGGCAAOAYIBjgAIhQIFCIAIRkGGCAAJioyIgAQboEA5wCBbhAAQIDAQIAAPFqlpUI8\"),\u001b\nb=atob(\"BAIEBgYGBgIEBAYGAwUCBQYDBgYGBgYGBgYCAwQGBAUGBgYGBgUFBgYCBgYFBgYGBgYGBgYGBgYGBgUDBQMEBgYFBQUFBQUFBQIEBQMGBQUFBQUFBAUGBgYGBQQCBAYG\");exports.add=function(c){c.prototype.setFont6x8=function(){this.setFontCustom(a,32,b,8)}}});\n\u0010\u001b[2dModules.addCached(\"Font6x12\",function(){var a=atob(\"AAAAAAAAfkAAwAAAwAAAEQf8EQf8EQAAGIJEf+JEE4AAMMMQBgCMMMAAM4TEMkB8AEwAgAAAHwIIQEAAQEIIHwAAFQDgBADgFQBABAHwBABAACAMAABABABABAAAAEAAAcBgGAYAAAP4RESEP4EEIEf8AEMMQUQkPEIIREREO4DwEQIQf8eISESER4P4SESEB4YAQcTgcAO4REREO4PEQkQoPwCIAAACCMAABACgEQIIAACQCQCQCQIIEQCgBAAAMAQ0RAOAP4TkUUP0P8RARAP8f8REREO4P4QEQEIIf8QEIIHwf8REREQEf8RARAQAP4QEREJ4f8BABAf8QEf8QEAYAEQEf4f8CgEQYMf8AEAEAEf8MADAMAf8f8GABgf8P4QEQEP4f8RARAOAP4QEQEP6f8RQRIOEOIREREI4QAQAf8QAQAAAf4AEAEf4eABwAMBweAf8AYBgAYf8YMGwBAGwYMYAGAB8GAYAQcRkWEYEf8QEAAYAGABgAcQEf8AAIAQAgAQAIAACACACACgAwAAAAYCkCkB8f8CECEB4B4CECEBIB4CECEf8B4CUCUBwCAP8SAQAB4CFCFD+f8CACAB8CET8AEACABT+AAf8BQCIAEQEf8AED8CAD8CAB8D8CACAB8B4CECEB4D/CECEB4B4CECED/D8BACAAABICkCkAYCAP4CECED4AEAED8DAAwAMAwDAD4AEA4AED4CMBQAgBQCMD4AFAFD+CMCUCkDEBAO4QEQEf8AAQEQEO4BAYAwAYAwA\"),\u001b\nb=atob(\"BAIEBgYGBQMEBAUFAwUCBQQEBAQEBAQEBAQCAwUEBQQEBAQEBAQEBAQDBAQEBQQEBAQEBAQGBQUFBQQDBAMFBAMEBAQEBAQEBAMEBAMFBAQEBAQEBAQFBQUEBAQCBAQ=\");exports.add=function(c){c.prototype.setFont6x12=function(){this.setFontCustom(a,32,b,12)}}});\n\u0010\u001b[4dModules.addCached(\"Font8x12\",function(){var a=atob(\"AAAAAAAAAAfkAAwAAAwAAACQf8CQf8CQAAGIJEf+JEE4AAMMMQBgCMMMAAAYMkTEMkAYBkAAwAgAAAHwIIQEAAQEIIHwAABAFQDgBADgFQBABABAHwBABAAAACAMAABABABABABAAAAEAAAEAYAgDAEAYAAAP4QkRESEP4AAEEIEf8AEAAMMQUQUQkPEAAIIQEREREO4AABwCQEQIQf8AAeISESESER4AAH4KESESEB4AAYAQAQcTgcAAAO4REREREO4AAPAQkQkQoPwAACIAAACCMAABACgEQIIAACQCQCQCQCQAAIIEQCgBAAAMAQAQ0RAOAAAP4QETkUUUUP0AAP8RARARAP8AAf8REREREO4AAP4QEQEQEIIAAf8QEQEIIHwAAf8REREREQEAAf8RARARAQAAAP4QEQEREJ4AAf8BABABAf8AAQEf8QEAAAYAEQEf4QAAAf8BACgEQYMAAf8AEAEAEAEAAf8IAEACAEAIAf8AAf8EACABAf8AAP4QEQEQEP4AAf8RARARAOAAAP4QEQEQGP6AAf8RgRQRIOEAAOIREREREI4AAQAQAf8QAQAAAf4AEAEAEf4AAeABwAMBweAAAf8AIAQAgAQAIf8AAYMGwBAGwYMAAYAGAB8GAYAAAQMQ0REWEYEAAf8QEAAMACABgAQAMAAQEf8AAIAQAgAQAIAAAACACACACACAAgAwAAAAYCkCkCkB8AAf8CECECEB4AAB4CECECEBIAAB4CECECEf8AAB4CUCUCUBwAACAP8SAQAAAB4CFCFCFD+AAf8CACACAB8AACET8AEAAACABT+AAf8AgBQCIAEAAQEf8AEAAD8CACAD8CACAB8AAD8CACACAB8AAB4CECECEB4AAD/CECECEB4AAB4CECECED/AAD8BACACACAAABICkCkCkAYAACAP4CECEAAD4AEAEAED8AADAAwAMAwDAAAD4AEAEA4AEAED4AACMBQAgBQCMAAD4AFAFAFD+AACMCUCkDECEAABAO4QEQEAAf8AAQEQEO4BAAAYAgAQAQAIAwAAAAAAAAAAAAA\"),\u001b\nb=atob(\"BQIEBgYGBwMEBAcGAwYCBwYFBgYGBgYGBgYCAwUGBQYHBgYGBgYGBgYEBgYGCAYGBgYGBgYGBggGBgYDBgMGBgMGBgYGBgUGBgQEBgQIBgYGBgYGBQYGCAYGBgUCBQcF\");exports.add=function(c){c.prototype.setFont8x12=function(){this.setFontCustom(a,32,b,12)}}});\n\u0010\u001b[6d`
