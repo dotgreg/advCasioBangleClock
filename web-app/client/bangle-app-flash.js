@@ -2,25 +2,22 @@ window.bangle_app_flash = `var opt = {
   dev: false,
 };
 
-const storage = require('Storage');
+require("Font6x12").add(Graphics);
+require("Font6x8").add(Graphics);
+require("Font8x12").add(Graphics);
+require("Font7x11Numeric7Seg").add(Graphics);
 
-		require("Font6x12").add(Graphics);
-		require("Font6x8").add(Graphics);
-		require("Font8x12").add(Graphics);
-		require("Font7x11Numeric7Seg").add(Graphics);
-
-		function bigThenSmall(big, small, x, y) {
-				g.setFont("7x11Numeric7Seg", 2);
-				g.drawString(big, x, y);
-				x += g.stringWidth(big);
-				g.setFont("8x12");
-				g.drawString(small, x, y);
-		}
+function bigThenSmall(big, small, x, y) {
+    g.setFont("7x11Numeric7Seg", 2);
+    g.drawString(big, x, y);
+    x += g.stringWidth(big);
+    g.setFont("8x12");
+    g.drawString(small, x, y);
+}
 
 
-		// sun, cloud, rain, thunder
-		var iconsWeather = [
-				require("heatshrink").decompress(atob("i8Ugf/ACcfA434BA/AAwsAv0/8F/BAcDwEHHIpECFI3wn4GC/gOC+PAGoXggEH/+ODQgXBGQv/wAbBBAnguEACIn4gfxI4JXFwJmG/kPBA3jSynw")), require("heatshrink").decompress(atob("i0Ugf/AEXggIGE/0A/kPBAmBCIN/A4Y8CgAICwEHBYoUE/ACCj4sDn4CBC4YyDwBrDCgYA3A")), require("heatshrink").decompress(atob("h8Rgf/AAuBAgf8h4FDCwM/AgPA/gFC/0HgEBBQPwnEfDoWAg4jC/gOCAoQmBAQXjFIV//8f//4IQP4j/+gAIB4EcHII4CAoI+DLQJXF/AA==")), require("heatshrink").decompress(atob("h0Pgf/AA8fAYX+g4EC8EBAgXADAeAgAECgAOC/wrCDQIOBBYfwgAaC/kAn4EB/EAv4aDHAeBIg38"))
+// sun, cloud, rain, thunder
+var iconsWeather = [	require("heatshrink").decompress(atob("i8Ugf/ACcfA434BA/AAwsAv0/8F/BAcDwEHHIpECFI3wn4GC/gOC+PAGoXggEH/+ODQgXBGQv/wAbBBAnguEACIn4gfxI4JXFwJmG/kPBA3jSynw")), require("heatshrink").decompress(atob("i0Ugf/AEXggIGE/0A/kPBAmBCIN/A4Y8CgAICwEHBYoUE/ACCj4sDn4CBC4YyDwBrDCgYA3A")), require("heatshrink").decompress(atob("h8Rgf/AAuBAgf8h4FDCwM/AgPA/gFC/0HgEBBQPwnEfDoWAg4jC/gOCAoQmBAQXjFIV//8f//4IQP4j/+gAIB4EcHII4CAoI+DLQJXF/AA==")), require("heatshrink").decompress(atob("h0Pgf/AA8fAYX+g4EC8EBAgXADAeAgAECgAOC/wrCDQIOBBYfwgAaC/kAn4EB/EAv4aDHAeBIg38"))
 		];
 
 
@@ -31,7 +28,6 @@ const storage = require('Storage');
 
 
 		// schedule a draw for the next minute
-		let rocketInterval;
 		var drawTimeout;
 		function queueDraw() {
 				if (drawTimeout) clearTimeout(drawTimeout);
@@ -43,28 +39,10 @@ const storage = require('Storage');
 
 
 		function clearIntervals() {
-				if (rocketInterval) clearInterval(rocketInterval);
-				rocketInterval = undefined;
 				if (drawTimeout) clearTimeout(drawTimeout);
 				drawTimeout = undefined;
 		}
 
-
-
-		////////////////////////////////////////////
-		// DATA READING
-		//
-        if (opt.dev) var dataJsonInt = {"tasks":"", "weather":[]};
-				function getDataJson(){
-						var res = {"tasks":"", "weather":[]};
-						res = dataJsonInt;
-						return res;
-				}
-
-				function setDataJson(resJson){
-						dataJsonInt = resJson;
-				}
-				var dataJson = getDataJson();
 
 		////////////////////////////////////////////
 		// WEATHER!
@@ -120,9 +98,6 @@ const storage = require('Storage');
 				g.drawString(require("locale").time(new Date(), 1), 76, 60);
 				
 				// day
-				//g.setFont("8x12", 1);
-				//g.setFont("9x18", 1);
-				//g.drawString(require("locale").dow(new Date(), 2).toUpperCase(), 25, 136);
 				g.setFont("8x12", 2);
 				g.drawString(require("locale").dow(new Date(), 2), 18, 130);
 				
@@ -144,13 +119,7 @@ const storage = require('Storage');
 		function getSteps() {
 				var steps = 0;
 				try{
-						if (WIDGETS.wpedom !== undefined) {
-								steps = WIDGETS.wpedom.getSteps();
-						} else if (WIDGETS.activepedom !== undefined) {
-								steps = WIDGETS.activepedom.getSteps();
-						} else {
-								steps = Bangle.getHealthStatus("day").steps;
-						}
+						steps = Bangle.getHealthStatus("day").steps;
 				} catch(ex) {
 						// In case we failed, we can only show 0 steps.
 						return "? k";
@@ -176,8 +145,8 @@ const storage = require('Storage');
 				
 				g.setColor(0, 0, 0);
 				g.setFont("6x12");
-				if(dataJson && dataJson.weather) drawWeather(dataJson.weather);
-				if(dataJson && dataJson.tasks) drawTasks(dataJson.tasks);
+				if(dataJsonInt && dataJsonInt.weather) drawWeather(dataJsonInt.weather);
+				if(dataJsonInt && dataJsonInt.tasks) drawTasks(dataJsonInt.tasks);
 				
 
 				g.setFontAlign(0,-1);
@@ -190,9 +159,6 @@ const storage = require('Storage');
 				drawClock();
 				drawBattery();
 				drawTimer();
-				// Hide widgets
-				for (let wd of WIDGETS) {wd.draw=()=>{};wd.area="";}
-      
         
 		}
 
@@ -299,7 +265,7 @@ function increment(dir) {
 		else if (selected.mode === 1) {
 				if (selected.alarm_hour === null) {
             curr.alarm_hour = curr.alarm_hour + dir;
-            if (curr.alarm_hour >= 23) curr.alarm_hour = 0;
+            if (curr.alarm_hour >= 24) curr.alarm_hour = 0;
             if (curr.alarm_hour < 0) curr.alarm_hour = 23;
 				}
 				else if (selected.alarm_min === null) {
@@ -415,7 +381,7 @@ function ringAlarm () {
   var inter = setInterval(function() { 
     if (opt.dev) console.log("ALARM RING > buzz");
     if (snoozeStatus) clearInterval(inter);
-    Bangle.buzz(500, 1); 
+    if (!snoozeStatus) Bangle.buzz(500, 1); 
   }, 2000);
 }
 
@@ -427,7 +393,7 @@ function snoozeAlarm() {
     selected.alarm_min = selected.alarm_min + 5;
   } else {
     selected.alarm_min = 0;
-    if (selected.alarm_hour < 23) {
+    if (selected.alarm_hour < 24) {
       selected.alarm_hour = selected.alarm_hour + 1;
     } else {
       selected.alarm_hour = 0;
@@ -524,15 +490,15 @@ function forceRedraw() {
 
 
 // Load widgets, but don't show them
-Bangle.loadWidgets();
+// Bangle.loadWidgets();
 
 // DISABLE CLICK TO MENU
-//Bangle.setUI("clock");
+// Bangle.setUI("clock");
 
 // POWER SPARING
 // 0.52mA - around 30 days if left like this
-//Bangle.accelWr(0x18,0x0A);
-Bangle.accelWr(0x18,0b11101100);
+Bangle.accelWr(0x18,0x0A);
+//Bangle.accelWr(0x18,0b11101100);
 // 0.7mA lower poll frequency (this handles watchdog so must be run at some point)
 Bangle.setPollInterval(1000); 
 // force LCD off
@@ -542,7 +508,6 @@ Bangle.setLCDBrightness(0);
 NRF.setConnectionInterval(100); 
 
 forceRedraw();
-
 `
 
 window.bangle_app_flash_simple = `g.reset();g.clear();g.setColor(0, 255, 0);g.fillRect(0, 0, g.getWidth(), g.getHeight())`;
