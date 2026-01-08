@@ -152,23 +152,26 @@ var dataJson = getDataJson();
 // WEATHER!
 //
 function drawWeather(arr) {
-		g.setFont("6x8", 1);
-		var p = {l: 8, tText: 40, tIcon:20, decal:25};
-    var today = new Date().getTime();
-    var yesterday = today - (1000 * 60 * 60 * 24);
-    var testday = today + (1000 * 60 * 60 * 24 * 2);
-    //12h auj > 12h hier qui est sup a 0h auj
-    //23h59 hier est sup a 0h auj
-    var j = 0;
-		for(var i = 0; i<arr.length;i++) {
-        if (arr[i][2] > yesterday && j < 4) {
-						g.drawString(arr[i][0], p.l + p.decal*j + 4, p.tText);
-						g.drawImage(iconsWeather[arr[i][1]], p.l + p.decal*j, p.tIcon, { scale: 1 });
-						j++
-        }
-		}
-}
+  if (!arr || !Array.isArray(arr)) return; // Exit if invalid
+  g.setFont("6x8", 1);
+  var p = { l: 8, tText: 40, tIcon: 20, decal: 25 };
+  var today = new Date().getTime();
+  var yesterday = today - (1000 * 60 * 60 * 24);
+  var j = 0;
 
+  for (var i = 0; i < arr.length; i++) {
+    if (!arr[i] || arr[i].length < 3) continue; // Skip malformed entries
+    var iconIndex = arr[i][1];
+    if (iconIndex < 0 || iconIndex >= iconsWeather.length) {
+      iconIndex = 0; // Fallback to first icon
+    }
+    if (arr[i][2] > yesterday && j < 4) {
+      g.drawString(arr[i][0], p.l + p.decal * j + 4, p.tText);
+      g.drawImage(iconsWeather[iconIndex], p.l + p.decal * j, p.tIcon, { scale: 1 });
+      j++;
+    }
+  }
+}
 
 ////////////////////////////////////////////
 // DRAWING FUNCS
