@@ -149,7 +149,7 @@ const getWeather = (location, apikey, cb) => {
 						const lon = data.coord.lon
 						log(`got weather coords from ${location} : ${lat} ${lon}`)
 						// get full data
-						fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=c9faf631b1c838fa4d4c0012498e2730&units=metric`)
+						fetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&appid=${apikey}&units=metric`)
 								.then(response => response.json())
 								.then(data => {
 										if (!data.daily) 		log(`ERROR weather api: ${JSON.stringify(data)}`);
