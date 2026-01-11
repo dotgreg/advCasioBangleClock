@@ -34,16 +34,93 @@ function getBackgroundImage() {
 
 
 
+
+////////////////////////////
+// SAVING HEALTH DATA
+//
+let minuteCounter = 0;
+let hourJson = {};
+// { "heart": [10,20,30,40,50,60] }
+function execEvery10m() {
+    let healthNow = Bangle.getHealthStatus();
+    if (!hourJson["heart"]) hourJson["heart"] = [];
+    hourJson["heart"].push(healthNow.bpm);
+}
+function execEveryHour() {
+    // get current month data
+    let monthJson = getHistDataJson();
+    let currD = formatDate("d");
+    let currH = formatDate("h");
+    if (!monthJson["heart"][currD]) monthJson["heart"][currD] = {};
+    monthJson["heart"][currD][currH] = hourJson["heart"]
+    hourJson = {}; // reset hour data
+
+    steps = Bangle.getHealthStatus("day").steps;
+    monthJson["steps"][currD] = steps
+    setHistDataJson(monthJson);
+}
+
+
+// FOR STORING HEALTH DATA EVERY HOURS 6*24 = 144
+function formatDate(format) {
+    const date = new Date();
+    const day = String(date.getDate()).padStart(2, '0');
+    const dayInt = parseInt(day);
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const year = String(date.getFullYear()).slice(-2); // Last 2 digits of year
+    const hourInt = date.getHours();
+    if (format === "mm-yy") return `${month}-${year}`;
+    if (format === "dd-mm-yy") return `${day}-${month}-${year}`;
+    if (format === "mmyy") return `${month}${year}`;
+    if (format === "d") return dayInt;
+    if (format === "h") return hourInt;
+}
+// will look like { "heart": {"1":{"1":[70,20,30],"2":[...]},"2":{...}}} }
+function getHistFilePath(){
+    let currentMMYY = formatDate("mmyy");
+    return `advcasio.histdata.${currentMMYY}.json`;
+}
+function getHistDataJson(){
+    var res = { "heart": {}, "steps": {} };
+    try { res = storage.readJSON(getHistFilePath()); } catch(ex) { return res; }
+    return res;
+}
+function setHistDataJson(resJson){
+    try { res = storage.writeJSON(getHistFilePath(), resJson); } catch(ex) { return res; }
+    return res;
+}
+
+
+
+
+
+
+
+
+
+
+
 // schedule a draw for the next minute
 let rocketInterval;
 var drawTimeout;
+
 function queueDraw() {
 		if (drawTimeout) clearTimeout(drawTimeout);
 		drawTimeout = setTimeout(function() {
+                minuteCounter++;
+                if (minuteCounter % 10 === 0) {
+                    execEvery10m();
+                }
+                if (minuteCounter % 60 === 0) {
+                    execEveryHour();
+                    minuteCounter = 0;
+                }
 				drawTimeout = undefined;
 				draw();
 		}, 60000 - (Date.now() % 60000));
 }
+
+
 
 
 function clearIntervals() {
@@ -135,22 +212,11 @@ function drawTimer() {
 //
 function getDataJson(){
 		var res = {"tasks":"", "weather":[]};
-		try {
-				res = storage.readJSON('advcasio.data.json');
-      // healthtest
-      
-
-		} catch(ex) {
-				return res;
-		}
+		try { res = storage.readJSON('advcasio.data.json'); } catch(ex) { return res; }
 		return res;
 }
 function setDataJson(resJson){
-		try {
-				res = storage.writeJSON('advcasio.data.json', resJson);
-		} catch(ex) {
-				return res;
-		}
+		try { res = storage.writeJSON('advcasio.data.json', resJson); } catch(ex) { return res; }
 		return res;
 }
 var dataJson = getDataJson();
@@ -204,7 +270,6 @@ function drawSteps() {
 }
 
 function drawHeart() {
-    
     let d = Bangle.getHealthStatus();
     let out = d.bpm;
     if (d.bpm < 1) out = "--";
@@ -293,7 +358,7 @@ function draw() {
         drawHeart();
         // test();
 		drawBattery();
-    drawTimer();
+        drawTimer();
 		// Hide widgets
 		for (let wd of WIDGETS) {wd.draw=()=>{};wd.area="";}
 }
