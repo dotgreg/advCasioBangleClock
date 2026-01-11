@@ -51,10 +51,10 @@ function execEveryHour() {
     let monthJson = getHistDataJson();
     let currD = formatDate("d");
     let currH = formatDate("h");
+    if (!monthJson || !monthJson["heart"]) monthJson = { "heart": {}, "steps": {} };
     if (!monthJson["heart"][currD]) monthJson["heart"][currD] = {};
     monthJson["heart"][currD][currH] = hourJson["heart"]
     hourJson = {}; // reset hour data
-
     steps = Bangle.getHealthStatus("day").steps;
     monthJson["steps"][currD] = steps
     setHistDataJson(monthJson);
@@ -78,7 +78,7 @@ function formatDate(format) {
 // will look like { "heart": {"1":{"1":[70,20,30],"2":[...]},"2":{...}}} }
 function getHistFilePath(){
     let currentMMYY = formatDate("mmyy");
-    return `advcasio.histdata.${currentMMYY}.json`;
+    return `advcasio.${currentMMYY}.json`;
 }
 function getHistDataJson(){
     var res = { "heart": {}, "steps": {} };
