@@ -19,6 +19,7 @@ Forked from the awesome Cassio Watch.<br/>
 - Current time
 - Current day and month
 - Footsteps
+- Heartrate
 - Battery
 - Simple Timer embedded  
 - Weather forecast (7 days)
