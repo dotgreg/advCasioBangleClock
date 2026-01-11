@@ -13,6 +13,10 @@ function bigThenSmall(big, small, x, y) {
 		g.drawString(small, x, y);
 }
 
+
+// encode https://www.espruino.com/Image+Converter
+// best params > compress + nearest color + optimal 4b
+// decode g.clear(1).drawImage(img).dump();
 function getClockBg() {
 		return require("heatshrink").decompress(atob("icVgf/ABv8v4DBx4CB+PH8F+nAGB48fwEHBwXjxwqBuPH//+nAGBBwIjCAwI2D/wGBgIyDI4QGDwAGBHYX/4AGBn4UFEYQpCEYYpCAAMfMhP4FIgABwJ8OEBIA=="));
 }
@@ -25,7 +29,7 @@ var iconsWeather = [
 
 
 function getBackgroundImage() {
-		return require("heatshrink").decompress(atob("2GwghC/AH4A/AH4AMl////wAwURiQECgUzmcxBQQCBiYUBBARW+LAcCAgcPBYgFBkAIFG7kQiAKIiIKBgISOAAJBD//zKQfxK4vyAoMQCgn/ERBhBBYR5BAwR1DB4Y2DgYPCGIQRCCQcP+EfGJI0FEgRSCGAQCCX4JXCkAhDn4lI+HyK4YWBFIPzJYJXHAIMSK4cwJ4I3CAYMzA4cfcRMBdwytBK4i6FK4IUCMgYAEGIITBK4cCaAPwgJXB+fzK4sAgYtCK5EfA4pXR+AmBaIZYCK6KcCAwSjDEYXx/8vK5QRCK4kPK6cDkJREBIMBfgIrDK5svUAIQBAwIaCK4w+DK4YGBK7IaBboIuCK4gFCJwYBBiBCCCgQhHHYgGDgArBK5IGDAYMgJ4Xwn53BGgLVDmBXKAAinDLpJXCAAYhHR4YODn/wJIPyTYZXDE4RXD+ECNILIDAIPwj4xIAAYNCR4fyVIYLFA4KEBBAglKAGUCmcykEAiMQBIURBYM/BgIUEgcz+bTKAH4A/AH4A/AHP/AGY1d+BWCh5X/LCpW1K74fgG/5X/AH5X/K9Bg/K63wK/5XWgBX/K6pWBK/5XU+BWBh5J/K6auCK/5XTVwRfFAH5XOKwRX/K6auDh5I/K6SuDWP5XSVwYADWX6vXK/5XQWQpW/K6auDJP5XWV35XT+Cu/K7Ku/K65H/K6hW/K7EPI35XWIv5XWAH5X/K/4A/K/5X/K/4A/K9cAAH4A/AFzz/AHRX/K/5X/AH5X/K/5X/AH5X/K/4A/K/5X/K/4A/K/5X/K/4A/K/5X/AH5X/K/5X/AH5X/K/5X/AH5X/K/4A/K/5X/K/4A/K/5X/K/4A/K/5X/AH5X/K/5X/AH5X/K/5X/AH5X/K/4A/K/5X/K/4A/K/5X/K/4A/K/5X/AH5X/K/5X/AH5X/K/5X/AH5X/K/4A/K/5X/K/4A/K/5X/K/4A/K/5X/AH5X/K/5X/AH5X/K/40VAH4A/AFzLb+EPDm4AdK/5X/K+PwgEAHy5X9HgMAK/5XXH6xX/H65X/K/5X/K98AK7sAgBX3DjBWFO644DSTHwGzJXED4RXaDoLqcK7weWDIQcXK8I6YK77KXK4o8DPbY6ZK7qvDDy6vdR7JXDh60EDyw5BAIRXYSwjMbAgIhUDwJZCHwJX0GwjRWNwIAEHSwBCDSpXFH4pXzDS5XIEARXVSYbQEDaYzCK+6vcKaxXNDypX9HwQkbHS40COSpXKK2A6CHgRXcPIhX0SwpXYVuQ6EgBX/K644YODBXkSDJX/K/5X/DtRX6gA3YOkRWbLDZX4KwYA/AG8F5vdABncKH4AGhpRJAYXNAgPAKP4AF5vMJwoDBAQIKE6BR/AAvc5vO9wAB7oCB9veAoPcAoPcK+kwh8AgcA98An//gH/+sD//wCISgBJ4IABAYpaC9vdK4UP/9AAQNQr/zgHwEYNQFYQAh+EP+FegH+A4QBCMQIKBAAPNK4yxBA4RXCV4YZBE4IjChwCDmApCK8VdmHggHgFYf0SQJXE5nMK4anCAoYHC5pXCaQJXBop+BqAGEK7f/AAQeEKwQrBqCtDAILjBCQfNK4JTCAYZXF7qvD//gV4S2DgEFFIYAECgIACMC8PKoIBB8n1K4ivF5vc5xOCWYZbBAYavHU4RXCr4pEAEMDfoNQGoMEgEwYQPwAoIBBAAPM5ipC7oDCVIIAE7hXCD4SdBiEP+gGBgihCFYIAz5pXBAAnN7oIB7nc5gOBK4QA/K4pNCWgSpCBInNK/4AGhncKIStC7gCBA4QAC4BR/AAysCABZW/AHwA="));
+    return require("heatshrink").decompress(atob("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"));
 }
 
 
@@ -133,6 +137,9 @@ function getDataJson(){
 		var res = {"tasks":"", "weather":[]};
 		try {
 				res = storage.readJSON('advcasio.data.json');
+      // healthtest
+      
+
 		} catch(ex) {
 				return res;
 		}
@@ -176,6 +183,12 @@ function drawWeather(arr) {
 ////////////////////////////////////////////
 // DRAWING FUNCS
 //
+
+function test() {
+    let img = getBackgroundImage();
+    g.clear(1).drawImage(img).dump();
+}
+
 function drawTasks(str) {
 		g.setFont("6x8", 1);
 		var t = 57;
@@ -190,6 +203,12 @@ function drawSteps() {
 		g.drawString(getSteps(), l+5, t+0);
 }
 
+function drawHeart() {
+    
+    let d = Bangle.getHealthStatus("day");
+    g.setFont("8x12", 2);
+    g.drawString(d.bpm , 18, 130);
+}
 
 function drawClock() {
 		g.setFont("7x11Numeric7Seg", 3);
@@ -208,8 +227,8 @@ function drawClock() {
 		//g.setFont("8x12", 1);
 		//g.setFont("9x18", 1);
 		//g.drawString(require("locale").dow(new Date(), 2).toUpperCase(), 25, 136);
-		g.setFont("8x12", 2);
-		g.drawString(require("locale").dow(new Date(), 2), 18, 130);
+		// g.setFont("8x12", 2);
+		// g.drawString(require("locale").dow(new Date(), 2), 18, 130);
 		
 		// month
 		g.setFont("8x12");
@@ -246,7 +265,6 @@ function getSteps() {
 }
 
 
-
 function draw() {
 		
 		queueDraw();
@@ -263,14 +281,15 @@ function draw() {
 		g.setFont("6x12");
 		if(dataJson && dataJson.weather) drawWeather(dataJson.weather);
 		if(dataJson && dataJson.tasks) drawTasks(dataJson.tasks);
-		
-
+    
 		g.setFontAlign(0,-1);
 		g.setFont("8x12", 2);
 
 		drawSteps();
 		g.setFontAlign(-1,-1);
 		drawClock();
+        drawHeart();
+        // test();
 		drawBattery();
     drawTimer();
 		// Hide widgets
