@@ -205,9 +205,11 @@ function drawSteps() {
 
 function drawHeart() {
     
-    let d = Bangle.getHealthStatus("day");
+    let d = Bangle.getHealthStatus();
+    let out = d.bpm;
+    if (d.bpm < 1) out = "--";
     g.setFont("8x12", 2);
-    g.drawString(d.bpm , 18, 130);
+    g.drawString(out , 18, 130);
 }
 
 function drawClock() {
