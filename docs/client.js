@@ -52,6 +52,7 @@ const toUpload = {
 
 const mainLogic = () => {
 		toUpload.tasks = textarea.value
+		
 		getWeather(locationInput.value, apiKeyInput.value, arr => {
 				toUpload.weather = arr
 				log(`object to upload to bangle: ${JSON.stringify(toUpload)}`)
@@ -138,6 +139,7 @@ const onTextSelect = () => {
 // WEATHER
 //
 const getWeather = (location, apikey, cb) => {
+		if (apikey.length === 0 || location.length ===0) return cb([])
 		// get coords
 		log(`Getting weather for ${location} using api key ${apikey}`);
 		fetch(`https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apikey}&units=metric`)
